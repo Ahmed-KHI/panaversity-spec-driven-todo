@@ -1,11 +1,15 @@
 # Hackathon II - Todo App (Phase I)
 
-![Python](https://img.shields.io/badge/Python-3.13+-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Phase](https://img.shields.io/badge/Phase-I%2FV-00D084?style=for-the-badge)
-![Methodology](https://img.shields.io/badge/Methodology-Spec--Driven-FF6B6B?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Complete-28A745?style=for-the-badge)
-![Panaversity](https://img.shields.io/badge/Panaversity-Hackathon%20II-9B59B6?style=for-the-badge)
-![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.13+-2b5b84?style=flat&logo=python&logoColor=white&labelColor=1e415e)
+![Phase](https://img.shields.io/badge/Phase-I%2FV-00a86b?style=flat&labelColor=006644)
+![Methodology](https://img.shields.io/badge/Methodology-Spec--Driven-c9510c?style=flat&labelColor=9e3d00)
+![Status](https://img.shields.io/badge/Status-Complete-2d7d46?style=flat&labelColor=1e5631)
+![Panaversity](https://img.shields.io/badge/Panaversity-Hackathon%20II-6c4a7e?style=flat&labelColor=4a3459)
+![License](https://img.shields.io/badge/License-MIT-4a7ba7?style=flat&labelColor=2f5573)
+
+</div>
 
 **Evolution of Todo - Spec-Driven Development Journey**
 
