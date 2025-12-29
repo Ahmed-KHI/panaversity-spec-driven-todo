@@ -17,6 +17,8 @@ This project is part of **Panaversity Hackathon II**, demonstrating mastery of S
 
 **Repository:** [github.com/Ahmed-KHI/panaversity-spec-driven-todo](https://github.com/Ahmed-KHI/panaversity-spec-driven-todo)
 
+**Demo Video:** [Watch on YouTube](https://youtu.be/YFieZqYKFew) 🎬
+
 ---
 
 ## 📋 Project Overview
@@ -415,7 +417,10 @@ For questions about this project:
 
 ## 🎬 Demo Video
 
-**Coming Soon** - Maximum 90 seconds demonstrating:
+**YouTube:** [Watch Phase I Demo Video](https://youtu.be/YFieZqYKFew) 🎥
+
+**Duration:** 90 seconds  
+**Features Demonstrated:**
 - All 5 Basic Level features
 - Spec-driven development workflow
 - Error handling
@@ -425,10 +430,18 @@ For questions about this project:
 
 ## 🔗 Links
 
-- **Hackathon Documentation:** [Link to Hackathon Requirements]
+- **GitHub Repository:** https://github.com/Ahmed-KHI/panaversity-spec-driven-todo
+- **Demo Video:** https://youtu.be/YFieZqYKFew
 - **Submission Form:** https://forms.gle/KMKEKaFUD6ZX4UtY8
 - **Panaversity:** https://panaversity.org
 - **Zoom Presentations:** Sundays at 8:00 PM
+
+---
+
+## 📞 Contact
+
+**WhatsApp:** +92 336 3708986  
+**GitHub:** [@Ahmed-KHI](https://github.com/Ahmed-KHI)
 
 ---
 
