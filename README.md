@@ -386,15 +386,6 @@ This project is created for educational purposes as part of Panaversity Hackatho
 
 ---
 
-## 👤 Author
-
-**[Your Name]**  
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-- WhatsApp: [Your Number] (for presentation invitation)
-
----
-
 ## 🙏 Acknowledgments
 
 - **Panaversity Team** - For organizing Hackathon II
