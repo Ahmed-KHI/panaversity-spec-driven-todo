@@ -1,0 +1,27 @@
+# requirements.txt for Hugging Face Spaces deployment
+# Generated from pyproject.toml dependencies
+
+# Core FastAPI and ASGI server
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+
+# Database and ORM
+sqlmodel>=0.0.22
+psycopg2-binary>=2.9.10
+
+# Data validation and settings
+pydantic>=2.10.0
+pydantic-settings>=2.6.0
+email-validator>=2.2.0
+
+# Authentication and security
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.2.1
+pyjwt>=2.10.0
+
+# File upload handling
+python-multipart>=0.0.17
+
+# Additional dependencies for production
+requests>=2.31.0
