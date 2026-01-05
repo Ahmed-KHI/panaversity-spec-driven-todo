@@ -8,11 +8,19 @@ This repository showcases the evolution of a todo application from a simple cons
 
 ### **Hackathon Phases**
 
-- **Phase I**: Console-based todo application (Python/TypeScript/JavaScript)
-- **Phase II**: Full-stack web application (Next.js + FastAPI + PostgreSQL)
-- **Phase III**: *(Coming Soon)*
-- **Phase IV**: *(Coming Soon)*
-- **Phase V**: *(Coming Soon)*
+- **Phase I**: Console-based todo application (Python/TypeScript/JavaScript) ✅
+- **Phase II**: Full-stack web application (Next.js + FastAPI + PostgreSQL) ✅ **[LIVE DEMO](https://panaversity-spec-driven-todo.vercel.app)**
+- **Phase III**: AI Chatbot with MCP tools *(Coming Soon)*
+- **Phase IV**: Kubernetes deployment *(Coming Soon)*
+- **Phase V**: Cloud deployment with event-driven architecture *(Coming Soon)*
+
+### **🔗 Live Deployments**
+
+| Phase | Component | URL | Status |
+|-------|-----------|-----|--------|
+| Phase II | Frontend | [https://panaversity-spec-driven-todo.vercel.app](https://panaversity-spec-driven-todo.vercel.app) | ✅ Live |
+| Phase II | Backend API | [https://ahmedkhi-todo-api-phase2.hf.space](https://ahmedkhi-todo-api-phase2.hf.space) | ✅ Live |
+| Phase II | API Docs | [https://ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs) | ✅ Live |
 
 ---
 
