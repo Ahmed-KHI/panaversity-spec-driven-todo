@@ -21,7 +21,7 @@ export default async function DashboardPage() {
 
     apiClient.setToken(token)
     
-    let tasks = []
+    let tasks: any[] = []
     try {
       const response = await apiClient.getTasks(user.id)
       tasks = response.tasks
