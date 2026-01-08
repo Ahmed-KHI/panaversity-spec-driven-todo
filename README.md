@@ -21,6 +21,7 @@ This repository showcases the evolution of a todo application from a simple cons
 | Phase II | Frontend | [https://panaversity-spec-driven-todo.vercel.app](https://panaversity-spec-driven-todo.vercel.app) | ✅ Live |
 | Phase II | Backend API | [https://ahmedkhi-todo-api-phase2.hf.space](https://ahmedkhi-todo-api-phase2.hf.space) | ✅ Live |
 | Phase II | API Docs | [https://ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs) | ✅ Live |
+| Phase II | Demo Video | [https://youtu.be/JxSIwGrt2zk](https://youtu.be/JxSIwGrt2zk) | 🎬 90 seconds |
 
 ---
 
