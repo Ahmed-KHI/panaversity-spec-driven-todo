@@ -234,7 +234,7 @@ MIT License - See individual phase directories for specific licenses.
 
 ## 👨‍💻 Author
 
-**Ahmed Khan**  
+**Mirza Muhammad Ahmed**  
 GIAIC Hackathon II Participant  
 Spec-Driven Development Advocate  
 
@@ -246,14 +246,6 @@ Spec-Driven Development Advocate
 - **Phase II Submission Date**: January 5, 2026
 - **Repository**: https://github.com/Ahmed-KHI/panaversity-spec-driven-todo
 - **Tag**: `phase-2-submission`
-
----
-
-## 🔗 Links
-
-- **Live Demo**: *(Coming after deployment)*
-- **Backend API**: *(Coming after HF Spaces deployment)*
-- **Demo Video**: *(Coming soon)*
 
 ---
 
