@@ -10,7 +10,7 @@ This repository showcases the evolution of a todo application from a simple cons
 
 - **Phase I**: Console-based todo application (Python/TypeScript/JavaScript) ✅
 - **Phase II**: Full-stack web application (Next.js + FastAPI + PostgreSQL) ✅ **[LIVE DEMO](https://panaversity-spec-driven-todo.vercel.app)**
-- **Phase III**: AI Chatbot with MCP tools *(Coming Soon)*
+- **Phase III**: AI Chatbot with MCP tools (Natural language task management) ✅
 - **Phase IV**: Kubernetes deployment *(Coming Soon)*
 - **Phase V**: Cloud deployment with event-driven architecture *(Coming Soon)*
 
@@ -45,6 +45,69 @@ panaversity-spec-driven-todo/
 ├── README.md                 # This file
 ├── CLAUDE.md                 # Claude Code instructions
 └── .gitignore                # Git ignore rules
+```
+
+---
+
+## 🤖 Phase III: AI Chatbot with MCP Tools
+
+### **Technology Stack**
+
+#### AI & Agent Layer
+- **OpenAI GPT-4 Turbo Preview** - Natural language understanding
+- **MCP (Model Context Protocol)** - Stateless tool architecture
+- **Function Calling** - 5 task management tools
+- **Conversation Persistence** - PostgreSQL storage
+
+#### MCP Tools (Stateless Functions)
+1. **add_task** - Create new tasks from natural language
+2. **list_tasks** - Query tasks with optional status filter
+3. **complete_task** - Mark tasks as complete
+4. **update_task** - Modify task title/description
+5. **delete_task** - Remove tasks
+
+#### Security Architecture
+- **4-Layer User Isolation**: JWT validation → Path verification → DB filtering → MCP enforcement
+- **Stateless Design**: Every tool call receives explicit user_id
+- **No Context Leakage**: Agent cannot access other users' data
+
+### **Key Features**
+
+✅ **Natural Language Interface**: "Add task to buy groceries" → Task created  
+✅ **Conversation History**: Full chat history persisted per user  
+✅ **Tool Execution**: AI automatically calls correct MCP functions  
+✅ **User Isolation**: Each conversation isolated by user_id  
+✅ **Friendly Confirmations**: Human-readable success messages  
+✅ **Error Handling**: Graceful failures with user-friendly messages  
+
+### **API Endpoints**
+
+- **POST /api/{user_id}/chat** - Send message to AI agent
+  - Request: `{ "message": "Add task to call mom" }`
+  - Response: `{ "response": "I've added the task...", "conversation_id": 1 }`
+
+### **Database Schema (Phase III)**
+
+**Conversations Table:**
+```sql
+CREATE TABLE conversations (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**Messages Table:**
+```sql
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    conversation_id INT REFERENCES conversations(id),
+    user_id UUID NOT NULL REFERENCES users(id),
+    role VARCHAR(50) NOT NULL,  -- 'user' or 'assistant'
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
 ```
 
 ---

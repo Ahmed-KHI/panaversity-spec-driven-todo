@@ -2,6 +2,7 @@
 Application configuration.
 [Task]: T-003 (Configuration)
 [From]: spec.md §11, plan.md §4
+[Updated]: T-014 (Phase III - Add OpenAI API key)
 """
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -26,6 +27,9 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "Todo Management API"
     APP_VERSION: str = "1.0.0"
+    
+    # Phase III: OpenAI
+    OPENAI_API_KEY: str
     
     model_config = SettingsConfigDict(
         env_file=".env",

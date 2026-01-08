@@ -2,13 +2,14 @@
 FastAPI main application.
 [Task]: T-011 (Main App)
 [From]: spec.md §5, plan.md §3
+[Updated]: T-008 (Phase III - Add chat router)
 """
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.database import create_db_and_tables
-from src.routers import auth, tasks
+from src.routers import auth, tasks, chat
 
 # Create FastAPI app
 app = FastAPI(
@@ -31,6 +32,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router)
 app.include_router(tasks.router)
+app.include_router(chat.router)  # Phase III: AI chat endpoint
 
 
 @app.on_event("startup")
