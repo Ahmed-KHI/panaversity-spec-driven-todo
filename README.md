@@ -23,7 +23,8 @@ This repository showcases the evolution of a todo application from a simple cons
 | **Phase II** | API Docs | [ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs) | ✅ Live |
 | **Phase II** | Demo Video | [youtu.be/JxSIwGrt2zk](https://youtu.be/JxSIwGrt2zk) | 🎬 90 seconds |
 | **Phase III** | Frontend + Chat | [panaversity-spec-driven-todo.vercel.app/chat](https://panaversity-spec-driven-todo.vercel.app/chat) | ✅ Live |
-| **Phase III** | Chat API | `POST /api/{user_id}/chat` | ✅ Active |
+| **Phase III** | Chat API Endpoint | `POST /api/{user_id}/chat` | ✅ Active |
+| **Phase III** | Chat API Docs | [ahmedkhi-todo-api-phase2.hf.space/docs#/chat](https://ahmedkhi-todo-api-phase2.hf.space/docs#/chat) | 📚 OpenAPI |
 | **Phase III** | Demo Video | *(Recording in progress)* | ⏳ Coming Soon |
 
 ---
@@ -155,9 +156,47 @@ panaversity-spec-driven-todo/
 
 ### **API Endpoints**
 
+**Full API Documentation**: [ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs)
+
+#### Chat Endpoint (Phase III)
 - **POST /api/{user_id}/chat** - Send message to AI agent
-  - Request: `{ "message": "Add task to call mom" }`
-  - Response: `{ "response": "I've added the task...", "conversation_id": 1 }`
+  - **Docs**: [Chat API Section](https://ahmedkhi-todo-api-phase2.hf.space/docs#/chat/chat_api__user_id__chat_post)
+  - **Request Body**: 
+    ```json
+    {
+      "message": "Add task to buy milk",
+      "conversation_id": 1  // optional, for continuing conversation
+    }
+    ```
+  - **Response**:
+    ```json
+    {
+      "conversation_id": 1,
+      "response": "✅ I've added a new task: 'Buy milk'",
+      "tool_calls": [
+        {
+          "add_task": {
+            "title": "Buy milk",
+            "status": "pending"
+          }
+        }
+      ]
+    }
+    ```
+  - **Authentication**: Requires JWT Bearer token
+  - **User Validation**: `user_id` in path must match token
+
+#### Task Endpoints (Phase II)
+- **GET /api/{user_id}/tasks** - List all tasks (with optional status filter)
+- **POST /api/{user_id}/tasks** - Create new task
+- **GET /api/{user_id}/tasks/{task_id}** - Get single task
+- **PUT /api/{user_id}/tasks/{task_id}** - Update task (full)
+- **PATCH /api/{user_id}/tasks/{task_id}** - Update task (partial)
+- **DELETE /api/{user_id}/tasks/{task_id}** - Delete task
+
+#### Auth Endpoints (Phase II)
+- **POST /api/auth/register** - Register new user
+- **POST /api/auth/login** - Login and get JWT token
 
 ### **Database Schema (Phase III)**
 
