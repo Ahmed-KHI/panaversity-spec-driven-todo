@@ -1,5 +1,5 @@
 /**
- * Chat page for AI assistant interaction.
+ * Chat page for AI assistant interaction - Phase III
  * [Task]: T-010
  * [From]: specs/003-phase-iii-chatbot/spec.md §9, plan.md §2.2.1
  */
