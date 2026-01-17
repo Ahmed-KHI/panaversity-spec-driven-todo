@@ -49,14 +49,15 @@ Available actions:
 - Update tasks when user wants to change or modify details
 - Delete tasks when user wants to remove or cancel them
 
+IMPORTANT: When users reference tasks, they will use the actual task ID number shown in the list.
+For example: "complete task #5" or "mark task 3 as done" - use that exact ID number.
+
 Always:
 - Be concise and friendly
 - Confirm actions with checkmarks (✅)
-- Format task lists clearly with numbers
+- When listing tasks, show the actual task ID (e.g., "Task #5: Buy groceries")
 - Ask for clarification if ambiguous
-- Handle errors gracefully with helpful messages
-
-When listing tasks, show them in a clear numbered format."""
+- Handle errors gracefully with helpful messages"""
     }
     
     # Build full message history
@@ -175,10 +176,10 @@ def _generate_confirmation(tool_calls: List[Dict]) -> str:
             return "You don't have any tasks yet. Would you like to add one?"
         tasks = result["tasks"]
         tasks_text = "\n".join([
-            f"{i+1}. {t['title']} {'✅' if t['completed'] else '⏳'}"
-            for i, t in enumerate(tasks)
+            f"Task #{t['id']}: {t['title']} {'✅' if t['completed'] else '⏳'}"
+            for t in tasks
         ])
-        return f"Here are your {count} task(s):\n\n{tasks_text}"
+        return f"Here are your {count} task(s):\n\n{tasks_text}\n\n💡 Use the task number (e.g., 'complete task #{tasks[0]['id']}') to manage them."
     elif tool == "complete_task":
         return f"✅ Marked '{result['title']}' as complete!"
     elif tool == "update_task":

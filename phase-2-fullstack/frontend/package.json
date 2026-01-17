@@ -10,6 +10,7 @@
     "migrate": "tsx scripts/create-better-auth-tables.ts"
   },
   "dependencies": {
+    "@openai/chatkit-react": "latest",
     "better-auth": "^1.4.10",
     "dotenv": "^17.2.3",
     "kysely": "^0.28.9",

@@ -10,7 +10,7 @@ This repository showcases the evolution of a todo application from a simple cons
 
 - **Phase I**: Console-based todo application (Python/TypeScript/JavaScript) ✅
 - **Phase II**: Full-stack web application (Next.js + FastAPI + PostgreSQL) ✅ **[LIVE DEMO](https://panaversity-spec-driven-todo.vercel.app)**
-- **Phase III**: AI Chatbot with MCP tools (Natural language task management) ✅
+- **Phase III**: AI Chatbot with MCP tools (Natural language task management) ✅ **[CURRENT SUBMISSION]**
 - **Phase IV**: Kubernetes deployment *(Coming Soon)*
 - **Phase V**: Cloud deployment with event-driven architecture *(Coming Soon)*
 
@@ -18,29 +18,102 @@ This repository showcases the evolution of a todo application from a simple cons
 
 | Phase | Component | URL | Status |
 |-------|-----------|-----|--------|
-| Phase II | Frontend | [https://panaversity-spec-driven-todo.vercel.app](https://panaversity-spec-driven-todo.vercel.app) | ✅ Live |
-| Phase II | Backend API | [https://ahmedkhi-todo-api-phase2.hf.space](https://ahmedkhi-todo-api-phase2.hf.space) | ✅ Live |
-| Phase II | API Docs | [https://ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs) | ✅ Live |
-| Phase II | Demo Video | [https://youtu.be/JxSIwGrt2zk](https://youtu.be/JxSIwGrt2zk) | 🎬 90 seconds |
+| **Phase II** | Frontend | [panaversity-spec-driven-todo.vercel.app](https://panaversity-spec-driven-todo.vercel.app) | ✅ Live |
+| **Phase II** | Backend API | [ahmedkhi-todo-api-phase2.hf.space](https://ahmedkhi-todo-api-phase2.hf.space) | ✅ Live |
+| **Phase II** | API Docs | [ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs) | ✅ Live |
+| **Phase II** | Demo Video | [youtu.be/JxSIwGrt2zk](https://youtu.be/JxSIwGrt2zk) | 🎬 90 seconds |
+| **Phase III** | Frontend + Chat | [panaversity-spec-driven-todo.vercel.app/chat](https://panaversity-spec-driven-todo.vercel.app/chat) | ✅ Live |
+| **Phase III** | Chat API | `POST /api/{user_id}/chat` | ✅ Active |
+| **Phase III** | Demo Video | *(Recording in progress)* | ⏳ Coming Soon |
 
 ---
 
 ## 📂 Repository Structure
 
+**Note:** Phase III is built **inside** `phase-2-fullstack/` because it **extends** Phase II with AI features, rather than replacing it. This shows incremental evolution of the same application.
+
 ```
 panaversity-spec-driven-todo/
-├── phase-1-console/          # Console Todo Application
+├── phase-1-console/          # Phase I: Console Todo Application
 │   ├── src/                  # Python/TS/JS source code
 │   ├── .spec-kit/            # Spec-Kit Plus configuration
 │   ├── .claude/              # Claude Code instructions
 │   └── pyproject.toml        # Project dependencies
 │
-├── phase-2-fullstack/        # Full-Stack Web Application
-│   ├── backend/              # FastAPI backend with PostgreSQL
-│   ├── frontend/             # Next.js 16 frontend with Better Auth
-│   ├── specs/                # Specification documents
+├── phase-2-fullstack/        # Phase II + III: Full-Stack Web App + AI Chatbot
+│   │
+│   ├── backend/              # FastAPI Backend
+│   │   ├── src/
+│   │   │   ├── agent/        # 🤖 Phase III: OpenAI Agent Runner
+│   │   │   ├── mcp/          # 🔧 Phase III: MCP Server & Tools
+│   │   │   ├── models/
+│   │   │   │   ├── user.py           # Phase II: User model
+│   │   │   │   ├── task.py           # Phase II: Task model
+│   │   │   │   ├── conversation.py   # 🆕 Phase III: Conversation model
+│   │   │   │   └── message.py        # 🆕 Phase III: Message model
+│   │   │   ├── routers/
+│   │   │   │   ├── auth.py           # Phase II: Authentication
+│   │   │   │   ├── tasks.py          # Phase II: Task CRUD
+│   │   │   │   └── chat.py           # 🆕 Phase III: AI Chat endpoint
+│   │   │   └── main.py
+│   │   ├── migrations/       # Database migrations (Phase II + III)
+│   │   │   └── create_phase3_tables.py  # 🆕 Phase III migration
+│   │   └── pyproject.toml    # Dependencies (includes openai, mcp packages)
+│   │
+│   ├── frontend/             # Next.js 16 Frontend
+│   │   ├── app/
+│   │   │   ├── dashboard/    # Phase II: Task dashboard
+│   │   │   ├── chat/         # 🆕 Phase III: AI Chat interface
+│   │   │   ├── login/        # Phase II: Login page
+│   │   │   └── register/     # Phase II: Register page
+│   │   ├── components/
+│   │   │   ├── TaskList.tsx          # Phase II: Task components
+│   │   │   └── ChatInterface.tsx     # 🆕 Phase III: ChatKit component
+│   │   └── package.json      # Dependencies (includes @openai/chatkit-react)
+│   │
+│   ├── specs/                # Specification Documents
+│   │   ├── phase1-console-app.*.md           # Phase I specs
+│   │   ├── 002-phase-ii-full-stack/          # Phase II specs
+│   │   │   ├── spec.md
+│   │   │   ├── plan.md
+│   │   │   └── tasks.md
+│   │   └── 003-phase-iii-chatbot/            # 🆕 Phase III specs
+│   │       ├── spec.md       # Requirements & architecture
+│   │       ├── plan.md       # Technical design
+│   │       └── tasks.md      # Implementation tasks
+│   │
 │   ├── constitution.md       # Project principles & constraints
+│   ├── PHASE3-COMPLETE.md    # 🆕 Phase III completion report
+│   ├── PHASE3-CHATKIT-INSTALLED.md  # 🆕 ChatKit installation guide
 │   └── docker-compose.yml    # Local development environment
+│
+├── README.md                 # This file (project overview)
+├── CLAUDE.md                 # Claude Code instructions
+├── AGENTS.md                 # AI agent behavior guidelines
+└── .gitignore                # Git ignore rules
+```
+
+### Why Phase III is Inside `phase-2-fullstack/`:
+
+✅ **Same Application** - Phase III adds AI features to Phase II, doesn't replace it  
+✅ **Same Database** - Extends existing PostgreSQL with new tables  
+✅ **Same Deployment** - Same Vercel frontend, same HF Spaces backend  
+✅ **Incremental Evolution** - Shows how to add features to existing codebase  
+✅ **Cleaner Structure** - Avoids duplicating entire application  
+│   │   ├── app/
+│   │   │   ├── chat/         # 💬 AI Chat Interface (Phase III)
+│   │   │   ├── dashboard/    # Task dashboard
+│   │   │   └── login/        # Authentication
+│   │   └── components/
+│   │       └── ChatInterface.tsx  # OpenAI ChatKit integration
+│   ├── specs/                # Specification documents
+│   │   ├── 003-phase-iii-chatbot/  # Phase III specs
+│   │   │   ├── spec.md       # Requirements
+│   │   │   ├── plan.md       # Architecture
+│   │   │   └── tasks.md      # Implementation tasks
+│   ├── PHASE3-COMPLETE.md    # Phase III completion report
+│   ├── CHATKIT-SETUP.md      # ChatKit configuration guide
+│   └── constitution.md       # Project principles & constraints
 │
 ├── README.md                 # This file
 ├── CLAUDE.md                 # Claude Code instructions

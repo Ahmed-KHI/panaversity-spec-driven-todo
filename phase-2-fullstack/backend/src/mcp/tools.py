@@ -113,6 +113,10 @@ def complete_task(
         {"task_id": int, "status": "completed", "title": str}
     """
     try:
+        # Ensure user_id is UUID type
+        if isinstance(user_id, str):
+            user_id = UUID(user_id)
+            
         task = session.exec(
             select(Task).where(
                 Task.id == task_id,
@@ -159,6 +163,10 @@ def update_task(
         {"task_id": int, "status": "updated", "title": str}
     """
     try:
+        # Ensure user_id is UUID type
+        if isinstance(user_id, str):
+            user_id = UUID(user_id)
+            
         task = session.exec(
             select(Task).where(
                 Task.id == task_id,
@@ -205,6 +213,10 @@ def delete_task(
         {"task_id": int, "status": "deleted", "title": str}
     """
     try:
+        # Ensure user_id is UUID type
+        if isinstance(user_id, str):
+            user_id = UUID(user_id)
+            
         task = session.exec(
             select(Task).where(
                 Task.id == task_id,

@@ -16,6 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js"
+          async
+        ></script>
+      </head>
       <body className={inter.className}>
         <div className="min-h-screen bg-gray-50">
           {children}
