@@ -9,6 +9,9 @@ uvicorn[standard]>=0.32.0
 sqlmodel>=0.0.22
 psycopg2-binary>=2.9.10
 
+# OpenAI SDK for Phase III
+openai>=1.54.0
+
 # Data validation and settings
 pydantic>=2.10.0
 pydantic-settings>=2.6.0
