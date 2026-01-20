@@ -1,0 +1,166 @@
+{{/*
+[Task]: T037
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 5
+[Description]: Post-installation notes displayed to user after Helm install
+*/}}
+
+========================================
+✅ Phase IV Todo Application Deployed!
+========================================
+
+Release Name: {{ .Release.Name }}
+Namespace: {{ .Release.Namespace }}
+Chart Version: {{ .Chart.Version }}
+App Version: {{ .Chart.AppVersion }}
+
+========================================
+🚀 Accessing the Application
+========================================
+
+{{- if .Values.ingress.enabled }}
+
+1. Via Ingress (Recommended):
+
+   Add the following to /etc/hosts (if not already added):
+   
+   {{ if eq .Values.global.imagePullPolicy "Never" -}}
+   # For Minikube:
+   echo "$(minikube ip) {{ (index .Values.ingress.hosts 0).host }}" | sudo tee -a /etc/hosts
+   {{- else -}}
+   # Replace <INGRESS_IP> with your ingress controller's external IP:
+   # kubectl get ingress -n {{ .Release.Namespace }}
+   <INGRESS_IP> {{ (index .Values.ingress.hosts 0).host }}
+   {{- end }}
+
+   Then access:
+   → Frontend: http://{{ (index .Values.ingress.hosts 0).host }}
+   → Backend API: http://{{ (index .Values.ingress.hosts 0).host }}/api
+
+{{- else }}
+
+1. Via Port Forwarding:
+
+   # Frontend
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "todo.fullname" . }}-frontend {{ .Values.frontend.service.port }}:{{ .Values.frontend.service.port }}
+   → Access: http://localhost:{{ .Values.frontend.service.port }}
+
+   # Backend
+   kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "todo.fullname" . }}-backend {{ .Values.backend.service.port }}:{{ .Values.backend.service.port }}
+   → Access: http://localhost:{{ .Values.backend.service.port }}
+
+{{- end }}
+
+========================================
+📊 Verify Deployment Status
+========================================
+
+# Check all pods are running:
+kubectl get pods -n {{ .Release.Namespace }}
+
+# Check services:
+kubectl get svc -n {{ .Release.Namespace }}
+
+# Check ingress:
+kubectl get ingress -n {{ .Release.Namespace }}
+
+# Check autoscaling:
+kubectl get hpa -n {{ .Release.Namespace }}
+
+# View logs:
+kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "todo.name" . }},app.kubernetes.io/component=frontend
+kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/name={{ include "todo.name" . }},app.kubernetes.io/component=backend
+
+========================================
+🔒 Secrets Configuration
+========================================
+
+{{- if eq .Values.global.imagePullPolicy "Never" }}
+
+For Minikube development, you need to create secrets:
+
+# Database secret:
+kubectl create secret generic {{ .Values.secrets.databaseSecret }} \
+  -n {{ .Release.Namespace }} \
+  --from-literal=POSTGRES_PASSWORD=postgres123 \
+  --from-literal=DATABASE_URL=postgresql://{{ .Values.postgres.database.user }}:postgres123@{{ include "todo.fullname" . }}-postgres:5432/{{ .Values.postgres.database.name }}
+
+# OpenAI API secret (for AI chatbot):
+kubectl create secret generic {{ .Values.secrets.openaiSecret }} \
+  -n {{ .Release.Namespace }} \
+  --from-literal=OPENAI_API_KEY=your-openai-api-key-here
+
+# Better Auth secret:
+kubectl create secret generic {{ .Values.secrets.authSecret }} \
+  -n {{ .Release.Namespace }} \
+  --from-literal=BETTER_AUTH_SECRET=$(openssl rand -base64 32) \
+  --from-literal=BETTER_AUTH_URL=http://{{ (index .Values.ingress.hosts 0).host }}
+
+{{- else }}
+
+Ensure secrets are created before deployment:
+→ {{ .Values.secrets.databaseSecret }}
+→ {{ .Values.secrets.openaiSecret }}
+→ {{ .Values.secrets.authSecret }}
+
+{{- end }}
+
+========================================
+🔍 Health Checks
+========================================
+
+# Frontend health:
+curl http://{{ (index .Values.ingress.hosts 0).host }}/api/health
+
+# Backend health:
+curl http://{{ (index .Values.ingress.hosts 0).host }}/api/health
+
+Expected response: {"status":"ok"}
+
+========================================
+📈 Autoscaling Configuration
+========================================
+
+Frontend HPA:
+  Min Replicas: {{ .Values.frontend.autoscaling.minReplicas }}
+  Max Replicas: {{ .Values.frontend.autoscaling.maxReplicas }}
+  CPU Target: {{ .Values.frontend.autoscaling.targetCPUUtilizationPercentage }}%
+
+Backend HPA:
+  Min Replicas: {{ .Values.backend.autoscaling.minReplicas }}
+  Max Replicas: {{ .Values.backend.autoscaling.maxReplicas }}
+  CPU Target: {{ .Values.backend.autoscaling.targetCPUUtilizationPercentage }}%
+
+========================================
+🔄 Upgrade and Rollback
+========================================
+
+# Upgrade deployment:
+helm upgrade {{ .Release.Name }} ./helm-charts/todo -n {{ .Release.Namespace }} -f values-dev.yaml
+
+# Rollback to previous version:
+helm rollback {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+# View release history:
+helm history {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+========================================
+🗑️  Uninstall
+========================================
+
+# Remove all resources:
+helm uninstall {{ .Release.Name }} -n {{ .Release.Namespace }}
+
+# Clean up namespace:
+kubectl delete namespace {{ .Release.Namespace }}
+
+========================================
+📚 Documentation
+========================================
+
+→ README: phase-4-kubernetes/README.md
+→ Deployment Guide: phase-4-kubernetes/DEPLOYMENT.md
+→ Troubleshooting: phase-4-kubernetes/TROUBLESHOOTING.md
+
+========================================
+✨ Enjoy Phase IV!
+========================================

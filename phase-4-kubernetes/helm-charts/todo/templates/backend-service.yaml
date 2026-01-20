@@ -1,0 +1,25 @@
+{{/*
+[Task]: T048
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 7
+[Description]: Backend Service manifest with ClusterIP
+*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo.fullname" . }}-backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.backend.labels" . | nindent 4 }}
+  {{- with .Values.backend.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+  - port: {{ .Values.backend.service.port }}
+    targetPort: {{ .Values.backend.service.targetPort }}
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "todo.backend.selectorLabels" . | nindent 4 }}

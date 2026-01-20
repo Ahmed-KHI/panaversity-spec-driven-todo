@@ -5,16 +5,41 @@
  */
 
 import { redirect } from 'next/navigation';
-import { getAuthUser, getAuthToken } from '@/lib/auth';
+import { auth } from '@/lib/auth.config';
 import ChatInterface from '@/components/ChatInterface';
 import Link from 'next/link';
 
 export default async function ChatPage() {
-  const user = await getAuthUser();
-  const token = await getAuthToken();
-  
-  if (!user || !token) {
+  // Use Better Auth session
+  const session = await auth.api.getSession({
+    headers: await import('next/headers').then(m => m.headers())
+  });
+
+  if (!session?.user) {
     redirect('/login');
+  }
+
+  const user = session.user;
+
+  // Get backend token and user from cookies for API calls
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+  const backendUserCookie = cookieStore.get('user')?.value;
+
+  if (!token) {
+    redirect('/login');
+  }
+
+  // Parse backend user to get the backend UUID
+  let backendUserId = user.id; // fallback
+  if (backendUserCookie) {
+    try {
+      const backendUser = JSON.parse(backendUserCookie);
+      backendUserId = backendUser.id;
+    } catch (e) {
+      console.error('Failed to parse backend user cookie:', e);
+    }
   }
   
   return (
@@ -39,7 +64,7 @@ export default async function ChatPage() {
         </div>
         
         <ChatInterface
-          userId={user.id}
+          userId={backendUserId}
           jwtToken={token}
         />
         

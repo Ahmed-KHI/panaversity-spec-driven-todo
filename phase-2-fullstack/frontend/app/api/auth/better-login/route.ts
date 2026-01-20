@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth.config'
 import { cookies } from 'next/headers'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://todo-backend:8000'
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
     let backendUserId: string | null = null
 
     try {
+      console.log(`[better-login] Attempting backend login to: ${API_URL}/api/auth/login`)
+      console.log(`[better-login] Email: ${email}`)
+      
       const backendResponse = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -40,24 +43,31 @@ export async function POST(request: NextRequest) {
         }),
       })
 
+      console.log(`[better-login] Backend response status: ${backendResponse.status}`)
+      const responseText = await backendResponse.text()
+      console.log(`[better-login] Backend response body: ${responseText}`)
+
       if (backendResponse.ok) {
-        const backendData = await backendResponse.json()
+        const backendData = JSON.parse(responseText)
         backendToken = backendData.access_token
         backendUserId = backendData.user.id
+        console.log(`[better-login] Successfully got backend token for user: ${backendUserId}`)
       } else {
-        console.error('Backend login failed - user may not exist in backend yet')
+        console.error(`[better-login] Backend login failed with status ${backendResponse.status}: ${responseText}`)
       }
     } catch (backendError) {
-      console.error('Failed to login to backend:', backendError)
+      console.error('[better-login] Failed to login to backend:', backendError)
+      console.error('[better-login] Error details:', JSON.stringify(backendError, Object.getOwnPropertyNames(backendError)))
     }
 
     const cookieStore = await cookies()
 
     // Store backend JWT token for API calls
     if (backendToken) {
+      console.log('[better-login] Setting token cookie')
       cookieStore.set('token', backendToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: false, // Disabled for Kubernetes port-forward (HTTP)
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7,
         path: '/',
@@ -65,13 +75,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Store user info with backend user ID
+    console.log('[better-login] Setting user cookie with backend ID:', backendUserId)
     cookieStore.set('user', JSON.stringify({
       id: backendUserId || betterAuthResult.user.id,
       email: betterAuthResult.user.email,
       name: betterAuthResult.user.name
     }), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Disabled for Kubernetes port-forward (HTTP)
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',

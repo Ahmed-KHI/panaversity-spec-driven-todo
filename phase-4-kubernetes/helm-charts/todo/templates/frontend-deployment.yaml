@@ -1,0 +1,76 @@
+{{/*
+[Task]: T040
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 6
+[Description]: Frontend Deployment manifest with rolling update strategy
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo.fullname" . }}-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.frontend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "todo.frontend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "todo.frontend.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "todo.serviceAccountName" . }}
+      securityContext:
+        fsGroup: {{ .Values.frontend.securityContext.fsGroup }}
+      containers:
+      - name: frontend
+        image: {{ include "todo.frontend.image" . }}
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy | default (include "todo.imagePullPolicy" .) }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.frontend.service.targetPort }}
+          protocol: TCP
+        {{- if .Values.frontend.healthCheck.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.frontend.healthCheck.livenessProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.frontend.healthCheck.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.healthCheck.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.healthCheck.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.healthCheck.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.frontend.healthCheck.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.frontend.healthCheck.readinessProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.frontend.healthCheck.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.healthCheck.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.healthCheck.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.frontend.healthCheck.readinessProbe.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+        securityContext:
+          runAsNonRoot: {{ .Values.frontend.securityContext.runAsNonRoot }}
+          runAsUser: {{ .Values.frontend.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.frontend.securityContext.runAsGroup }}
+        env:
+        {{- range .Values.frontend.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+        - name: BACKEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "todo.fullname" . }}-config
+              key: BACKEND_URL

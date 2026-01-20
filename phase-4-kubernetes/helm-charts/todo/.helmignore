@@ -1,0 +1,49 @@
+# [Task]: T038
+# [From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 5
+# [Description]: Helm ignore file - exclude unnecessary files from chart package
+
+# Version control
+.git/
+.gitignore
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Documentation (include only essential docs)
+CONTRIBUTING.md
+DEVELOPMENT.md
+
+# Test files
+*_test.yaml
+test/
+tests/
+
+# Local development
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+
+# Archives
+*.tar.gz
+*.zip

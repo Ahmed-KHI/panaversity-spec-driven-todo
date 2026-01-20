@@ -4,7 +4,7 @@
  * [From]: spec.md §9, plan.md §8
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+import { API_URL } from './config'
 
 export interface User {
   id: string

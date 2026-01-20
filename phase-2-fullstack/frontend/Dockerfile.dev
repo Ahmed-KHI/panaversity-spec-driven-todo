@@ -11,6 +11,12 @@ RUN npm install
 # Copy application code
 COPY . .
 
+# Ensure .next directory exists and has correct permissions
+RUN mkdir -p /app/.next && chown -R node:node /app
+
+# Switch to node user
+USER node
+
 # Expose port
 EXPOSE 3000
 

@@ -62,7 +62,7 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
             onClick={() => setFilter('all')}
             className={`px-4 py-2 rounded-md text-sm font-medium ${
               filter === 'all'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -72,7 +72,7 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
             onClick={() => setFilter('pending')}
             className={`px-4 py-2 rounded-md text-sm font-medium ${
               filter === 'pending'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -82,7 +82,7 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
             onClick={() => setFilter('completed')}
             className={`px-4 py-2 rounded-md text-sm font-medium ${
               filter === 'completed'
-                ? 'bg-primary-600 text-white'
+                ? 'bg-blue-600 text-white shadow-md'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
@@ -92,7 +92,7 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 text-sm font-medium"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium shadow-md"
         >
           {showForm ? 'Cancel' : '+ New Task'}
         </button>

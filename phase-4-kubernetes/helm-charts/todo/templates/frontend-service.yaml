@@ -1,0 +1,25 @@
+{{/*
+[Task]: T041
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 6
+[Description]: Frontend Service manifest with ClusterIP
+*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo.fullname" . }}-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.frontend.labels" . | nindent 4 }}
+  {{- with .Values.frontend.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+  - port: {{ .Values.frontend.service.port }}
+    targetPort: {{ .Values.frontend.service.targetPort }}
+    protocol: TCP
+    name: http
+  selector:
+    {{- include "todo.frontend.selectorLabels" . | nindent 4 }}

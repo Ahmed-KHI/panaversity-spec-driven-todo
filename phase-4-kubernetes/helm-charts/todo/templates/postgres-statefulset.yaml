@@ -1,0 +1,88 @@
+{{/*
+[Task]: T054
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 8
+[Description]: PostgreSQL StatefulSet with persistent storage
+*/}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "todo.fullname" . }}-postgres
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.postgres.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "todo.fullname" . }}-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "todo.postgres.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "todo.postgres.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.postgres.securityContext.fsGroup }}
+      containers:
+      - name: postgres
+        image: {{ include "todo.postgres.image" . }}
+        imagePullPolicy: {{ .Values.postgres.image.pullPolicy | default (include "todo.imagePullPolicy" .) }}
+        ports:
+        - name: postgres
+          containerPort: {{ .Values.postgres.service.targetPort }}
+          protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: postgres
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        resources:
+          {{- toYaml .Values.postgres.resources | nindent 10 }}
+        securityContext:
+          runAsNonRoot: {{ .Values.postgres.securityContext.runAsNonRoot }}
+          runAsUser: {{ .Values.postgres.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.postgres.securityContext.runAsGroup }}
+        env:
+        - name: POSTGRES_USER
+          value: {{ .Values.postgres.database.user | quote }}
+        - name: POSTGRES_DB
+          value: {{ .Values.postgres.database.name | quote }}
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.databaseSecret }}
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+  {{- if .Values.postgres.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+      labels:
+        {{- include "todo.postgres.labels" . | nindent 8 }}
+    spec:
+      accessModes:
+        {{- range .Values.postgres.persistence.accessModes }}
+        - {{ . }}
+        {{- end }}
+      storageClassName: {{ .Values.postgres.persistence.storageClass | default (include "todo.storageClass" .) }}
+      resources:
+        requests:
+          storage: {{ .Values.postgres.persistence.size }}
+  {{- else }}
+      volumes:
+      - name: postgres-data
+        emptyDir: {}
+  {{- end }}

@@ -1,0 +1,22 @@
+{{/*
+[Task]: T055
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 8
+[Description]: PostgreSQL Service manifest (headless for StatefulSet)
+*/}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo.fullname" . }}-postgres
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.postgres.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.postgres.service.type }}
+  clusterIP: None  # Headless service for StatefulSet
+  ports:
+  - port: {{ .Values.postgres.service.port }}
+    targetPort: {{ .Values.postgres.service.targetPort }}
+    protocol: TCP
+    name: postgres
+  selector:
+    {{- include "todo.postgres.selectorLabels" . | nindent 4 }}

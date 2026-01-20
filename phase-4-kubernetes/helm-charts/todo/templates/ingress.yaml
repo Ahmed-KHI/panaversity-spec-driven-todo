@@ -1,0 +1,51 @@
+{{/*
+[Task]: T062
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 9
+[Description]: Ingress manifest for routing external traffic
+*/}}
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "todo.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                {{- if eq .service "frontend" }}
+                name: {{ include "todo.fullname" $ }}-frontend
+                port:
+                  number: {{ .port }}
+                {{- else if eq .service "backend" }}
+                name: {{ include "todo.fullname" $ }}-backend
+                port:
+                  number: {{ .port }}
+                {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

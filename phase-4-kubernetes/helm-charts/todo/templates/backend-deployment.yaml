@@ -1,0 +1,97 @@
+{{/*
+[Task]: T047
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 7
+[Description]: Backend Deployment manifest with rolling update strategy
+*/}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo.fullname" . }}-backend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.backend.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "todo.backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "todo.backend.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: {{ include "todo.serviceAccountName" . }}
+      securityContext:
+        fsGroup: {{ .Values.backend.securityContext.fsGroup }}
+      containers:
+      - name: backend
+        image: {{ include "todo.backend.image" . }}
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy | default (include "todo.imagePullPolicy" .) }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.backend.service.targetPort }}
+          protocol: TCP
+        {{- if .Values.backend.healthCheck.livenessProbe.enabled }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.backend.healthCheck.livenessProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.backend.healthCheck.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.backend.healthCheck.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.backend.healthCheck.livenessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.backend.healthCheck.livenessProbe.failureThreshold }}
+        {{- end }}
+        {{- if .Values.backend.healthCheck.readinessProbe.enabled }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.backend.healthCheck.readinessProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.backend.healthCheck.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.backend.healthCheck.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.backend.healthCheck.readinessProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.backend.healthCheck.readinessProbe.failureThreshold }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.backend.resources | nindent 10 }}
+        securityContext:
+          runAsNonRoot: {{ .Values.backend.securityContext.runAsNonRoot }}
+          runAsUser: {{ .Values.backend.securityContext.runAsUser }}
+          runAsGroup: {{ .Values.backend.securityContext.runAsGroup }}
+        env:
+        {{- range .Values.backend.env }}
+        - name: {{ .name }}
+          value: {{ .value | quote }}
+        {{- end }}
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.databaseSecret }}
+              key: DATABASE_URL
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.openaiSecret }}
+              key: OPENAI_API_KEY
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.authSecret }}
+              key: BETTER_AUTH_SECRET
+        - name: BETTER_AUTH_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.secrets.authSecret }}
+              key: BETTER_AUTH_URL
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ include "todo.fullname" . }}-config
+              key: LOG_LEVEL

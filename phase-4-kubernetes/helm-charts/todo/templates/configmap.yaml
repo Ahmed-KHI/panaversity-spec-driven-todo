@@ -1,0 +1,31 @@
+{{/*
+[Task]: T060
+[From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 9
+[Description]: ConfigMap for non-sensitive configuration
+*/}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "todo.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "todo.labels" . | nindent 4 }}
+data:
+  # Application configuration
+  APP_NAME: {{ .Values.config.appName | quote }}
+  ENVIRONMENT: {{ .Values.config.environment | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  
+  # Database configuration (connection details, not credentials)
+  DATABASE_HOST: {{ include "todo.fullname" . }}-postgres
+  DATABASE_PORT: {{ .Values.postgres.service.port | quote }}
+  DATABASE_NAME: {{ .Values.postgres.database.name | quote }}
+  DATABASE_USER: {{ .Values.postgres.database.user | quote }}
+  
+  # Service URLs
+  BACKEND_URL: "http://{{ include "todo.fullname" . }}-backend:{{ .Values.backend.service.port }}"
+  FRONTEND_URL: "http://{{ include "todo.fullname" . }}-frontend:{{ .Values.frontend.service.port }}"
+  
+  # Feature flags
+  ENABLE_AI_CHATBOT: {{ .Values.config.features.aiChatbot | quote }}
+  ENABLE_MCP_TOOLS: {{ .Values.config.features.mcpTools | quote }}

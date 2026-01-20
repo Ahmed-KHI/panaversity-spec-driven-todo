@@ -1,0 +1,107 @@
+# [Task]: T034
+# [From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 5
+# [Description]: Production-specific Helm values (template)
+
+# Production image pull policy
+global:
+  imagePullPolicy: IfNotPresent  # Pull from registry if not present
+  storageClass: "fast-ssd"  # Use high-performance storage class
+
+# Frontend - production resources
+frontend:
+  image:
+    pullPolicy: "IfNotPresent"
+  
+  replicaCount: 3  # Start with 3 replicas for high availability
+  
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 70
+
+# Backend - production resources
+backend:
+  image:
+    pullPolicy: "IfNotPresent"
+  
+  replicaCount: 3  # Start with 3 replicas for high availability
+  
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "512Mi"
+    limits:
+      cpu: "2000m"
+      memory: "2Gi"
+  
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 60
+    targetMemoryUtilizationPercentage: 70
+
+# PostgreSQL - production resources
+postgres:
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+  
+  persistence:
+    enabled: true
+    storageClass: "fast-ssd"  # High-performance storage
+    size: "50Gi"  # Larger size for production data
+
+# Ingress configuration for production
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"  # Auto TLS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: todo.yourdomain.com  # Replace with actual domain
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+          port: 3000
+        - path: /api
+          pathType: Prefix
+          service: backend
+          port: 8000
+  tls:
+    - secretName: todo-tls
+      hosts:
+        - todo.yourdomain.com
+
+# Production configuration
+config:
+  environment: "production"
+  logLevel: "info"
+
+# Pod Disruption Budget - enabled for production
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2  # Keep at least 2 pods running during updates
+
+# Network Policy - enabled for production security
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress

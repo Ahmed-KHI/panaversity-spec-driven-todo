@@ -1,0 +1,264 @@
+# [Task]: T032
+# [From]: specs/004-phase-iv-kubernetes/tasks.md §Phase 5
+# [Description]: Default Helm values for Phase IV Todo Application
+
+# Global configuration
+global:
+  # Image registry for all services
+  imageRegistry: ""
+  # Image pull policy (IfNotPresent for production, Never for local Minikube)
+  imagePullPolicy: IfNotPresent
+  # Storage class for persistent volumes
+  storageClass: "standard"
+
+# Frontend configuration
+frontend:
+  # Image configuration
+  image:
+    registry: docker.io
+    repository: ahmed-khi/todo-frontend
+    tag: "v4.0.0"
+    pullPolicy: "IfNotPresent"
+  
+  # Replica configuration
+  replicaCount: 2
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  healthCheck:
+    livenessProbe:
+      enabled: true
+      path: /api/health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      enabled: true
+      path: /api/health
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+    annotations: {}
+  
+  # Security context
+  securityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
+    runAsNonRoot: true
+  
+  # Environment variables
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: API_URL
+      value: "http://todo-backend:8000"
+    - name: NEXT_PUBLIC_API_URL
+      value: "http://localhost:8000"
+    - name: DATABASE_URL
+      value: "postgresql://todo_user:postgres123@todo-postgres:5432/todo_db"
+    - name: BETTER_AUTH_SECRET
+      value: "hackathon-phase4-secret-min-32-chars-long-for-better-auth"
+    - name: BETTER_AUTH_URL
+      value: "http://todo.local"
+
+# Backend configuration
+backend:
+  # Image configuration
+  image:
+    registry: docker.io
+    repository: ahmed-khi/todo-backend
+    tag: "v4.0.0"
+    pullPolicy: "IfNotPresent"
+  
+  # Replica configuration
+  replicaCount: 2
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+  
+  # Autoscaling configuration
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+  
+  # Health check configuration
+  healthCheck:
+    livenessProbe:
+      enabled: true
+      path: /health
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 3
+    readinessProbe:
+      enabled: true
+      path: /health
+      initialDelaySeconds: 10
+      periodSeconds: 5
+      timeoutSeconds: 3
+      failureThreshold: 3
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    annotations: {}
+  
+  # Security context
+  securityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+    fsGroup: 1001
+    runAsNonRoot: true
+  
+  # Environment variables (non-sensitive)
+  env:
+    - name: PYTHON_ENV
+      value: "production"
+    - name: WORKERS
+      value: "1"
+
+# PostgreSQL configuration
+postgres:
+  # Image configuration
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: "IfNotPresent"
+  
+  # Resource limits and requests
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "2Gi"
+  
+  # Persistence configuration
+  persistence:
+    enabled: true
+    storageClass: "standard"
+    size: "10Gi"
+    accessModes:
+      - ReadWriteOnce
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  
+  # Security context
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
+    fsGroup: 999
+    runAsNonRoot: true
+  
+  # Database configuration (non-sensitive defaults)
+  database:
+    name: "todo_db"
+    user: "todo_user"
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: todo.local
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+          port: 3000
+        - path: /api
+          pathType: Prefix
+          service: backend
+          port: 8000
+  tls: []
+  # Uncomment for TLS:
+  # tls:
+  #   - secretName: todo-tls
+  #     hosts:
+  #       - todo.local
+
+# ConfigMap data (non-sensitive configuration)
+config:
+  # Application configuration
+  appName: "Phase IV Todo Application"
+  environment: "production"
+  logLevel: "info"
+  
+  # Feature flags
+  features:
+    aiChatbot: "true"
+    mcpTools: "true"
+
+# Secrets (references to Kubernetes Secrets - actual values set via kubectl)
+secrets:
+  # Database credentials secret name
+  databaseSecret: "todo-database-secret"
+  
+  # OpenAI API key secret name (for AI chatbot)
+  openaiSecret: "todo-openai-secret"
+  
+  # Better Auth secret name
+  authSecret: "todo-auth-secret"
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "todo-sa"
+
+# Network Policy
+networkPolicy:
+  enabled: false
+  # Uncomment to enable network isolation:
+  # policyTypes:
+  #   - Ingress
+  #   - Egress
+
+# Pod Disruption Budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
