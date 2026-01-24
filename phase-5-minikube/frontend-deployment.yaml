@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: todo-frontend:5.0.2
+        image: todo-frontend:5.0.4
         imagePullPolicy: IfNotPresent  # Use Never for Minikube, IfNotPresent for flexibility
         ports:
         - containerPort: 3000

@@ -15,10 +15,10 @@ export async function PUT(
   try {
     const { id } = await params
     const body = await request.json()
-    const { userId, title, description } = body
+    const { userId, ...taskData } = body
 
     apiClient.setToken(token)
-    const task = await apiClient.updateTask(userId, parseInt(id), { title, description })
+    const task = await apiClient.updateTask(userId, parseInt(id), taskData)
 
     return NextResponse.json(task)
   } catch (error: any) {

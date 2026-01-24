@@ -40,12 +40,12 @@ class RecurrencePatternCreate(BaseModel):
 class RecurrencePatternResponse(BaseModel):
     """Recurrence pattern response."""
     frequency: RecurrenceFrequency
-    interval: int
-    days_of_week: Optional[List[int]]
-    day_of_month: Optional[int]
-    month: Optional[int]
-    end_date: Optional[date]
-    occurrences: Optional[int]
+    interval: int = 1
+    days_of_week: Optional[List[int]] = None
+    day_of_month: Optional[int] = None
+    month: Optional[int] = None
+    end_date: Optional[date] = None
+    occurrences: Optional[int] = None
     
     model_config = ConfigDict(from_attributes=True)
 

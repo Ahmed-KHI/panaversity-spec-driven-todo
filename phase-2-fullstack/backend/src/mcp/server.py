@@ -21,14 +21,10 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
             "type": "function",
             "function": {
                 "name": "add_task",
-                "description": "Create a new task for the user with title and optional description",
+                "description": "Create a new task for the user with title, description, priority, due date, and recurrence options",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "User UUID from JWT token"
-                        },
                         "title": {
                             "type": "string",
                             "description": "Task title (1-200 characters)"
@@ -36,9 +32,27 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
                         "description": {
                             "type": "string",
                             "description": "Optional task description"
+                        },
+                        "priority": {
+                            "type": "string",
+                            "enum": ["low", "medium", "high", "urgent"],
+                            "description": "Task priority level (default: medium)"
+                        },
+                        "due_date": {
+                            "type": "string",
+                            "description": "Due date in ISO format (YYYY-MM-DDTHH:MM:SS), e.g., '2026-01-25T15:00:00'"
+                        },
+                        "is_recurring": {
+                            "type": "boolean",
+                            "description": "Whether the task repeats (default: false)"
+                        },
+                        "recurrence_frequency": {
+                            "type": "string",
+                            "enum": ["daily", "weekly", "monthly", "yearly"],
+                            "description": "How often the task repeats (only used if is_recurring is true)"
                         }
                     },
-                    "required": ["user_id", "title"]
+                    "required": ["title"]
                 }
             }
         },
@@ -50,17 +64,13 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "User UUID from JWT token"
-                        },
                         "status": {
                             "type": "string",
                             "enum": ["all", "pending", "completed"],
                             "description": "Filter tasks by completion status (default: all)"
                         }
                     },
-                    "required": ["user_id"]
+                    "required": []
                 }
             }
         },
@@ -72,16 +82,12 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "User UUID from JWT token"
-                        },
                         "task_id": {
                             "type": "integer",
                             "description": "ID of the task to mark as complete"
                         }
                     },
-                    "required": ["user_id", "task_id"]
+                    "required": ["task_id"]
                 }
             }
         },
@@ -93,10 +99,6 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "User UUID from JWT token"
-                        },
                         "task_id": {
                             "type": "integer",
                             "description": "ID of the task to update"
@@ -110,7 +112,7 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
                             "description": "New task description (optional)"
                         }
                     },
-                    "required": ["user_id", "task_id"]
+                    "required": ["task_id"]
                 }
             }
         },
@@ -122,16 +124,12 @@ def get_mcp_tools() -> List[Dict[str, Any]]:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "user_id": {
-                            "type": "string",
-                            "description": "User UUID from JWT token"
-                        },
                         "task_id": {
                             "type": "integer",
                             "description": "ID of the task to delete"
                         }
                     },
-                    "required": ["user_id", "task_id"]
+                    "required": ["task_id"]
                 }
             }
         }

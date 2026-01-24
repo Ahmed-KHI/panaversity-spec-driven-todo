@@ -41,6 +41,11 @@ Thumbs.db
 .env
 .env.local
 
+# Kubernetes Secrets (DO NOT COMMIT - Contains API Keys)
+phase-5-minikube/secrets.yaml
+phase-5-gke/secrets.yaml
+**/secrets.yaml
+
 # UV
 .uv/
 uv.lock

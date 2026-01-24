@@ -117,7 +117,11 @@ Always:
                         session, 
                         UUID(tool_args["user_id"]), 
                         tool_args["title"],
-                        tool_args.get("description")
+                        tool_args.get("description"),
+                        tool_args.get("priority", "medium"),
+                        tool_args.get("due_date"),
+                        tool_args.get("is_recurring", False),
+                        tool_args.get("recurrence_frequency", "daily")
                     )
                 elif tool_name == "list_tasks":
                     result = mcp_tools.list_tasks(

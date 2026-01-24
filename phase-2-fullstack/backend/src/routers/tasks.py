@@ -237,7 +237,7 @@ def create_task(
     
     # Handle recurrence pattern
     if request.recurrence_pattern:
-        task.recurrence_pattern = request.recurrence_pattern.model_dump()
+        task.recurrence_pattern = request.recurrence_pattern.model_dump(exclude_none=True)
     
     session.add(task)
     session.flush()  # Get task ID before adding tags
@@ -402,7 +402,7 @@ def update_task(
     if request.is_recurring is not None:
         task.is_recurring = request.is_recurring
     if request.recurrence_pattern is not None:
-        task.recurrence_pattern = request.recurrence_pattern.model_dump()
+        task.recurrence_pattern = request.recurrence_pattern.model_dump(exclude_none=True)
     
     # Update tags if provided
     if request.tags is not None:
@@ -453,7 +453,7 @@ def update_task(
         if request.is_recurring is not None:
             changes["is_recurring"] = request.is_recurring
         if request.recurrence_pattern is not None:
-            changes["recurrence_pattern"] = request.recurrence_pattern.model_dump()
+            changes["recurrence_pattern"] = request.recurrence_pattern.model_dump(exclude_none=True)
         if request.tags is not None:
             changes["tags"] = request.tags
         

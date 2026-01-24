@@ -1,22 +1,29 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@/lib/auth.config'
 import { apiClient } from '@/lib/api'
 import TaskList from '@/components/TaskList'
 import Header from '@/components/Header'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 
 export default async function DashboardPage() {
   try {
-    // Use Better Auth session instead of custom cookies
-    const session = await auth.api.getSession({
-      headers: await import('next/headers').then(m => m.headers())
-    })
-
-    if (!session?.user) {
+    // Check authentication via backend cookies (no Better Auth session needed)
+    const cookieStore = await cookies()
+    const backendToken = cookieStore.get('token')?.value
+    const backendUserCookie = cookieStore.get('user')?.value
+    
+    if (!backendToken || !backendUserCookie) {
       redirect('/login')
     }
 
-    const user = session.user
+    // Parse backend user
+    let user: any
+    try {
+      user = JSON.parse(backendUserCookie)
+    } catch (e) {
+      console.error('Failed to parse backend user cookie:', e)
+      redirect('/login')
+    }
 
     // Validate user has proper ID
     if (!user.id || user.id.length < 10) {
@@ -24,22 +31,7 @@ export default async function DashboardPage() {
       redirect('/login')
     }
 
-    // Get backend token and user info from custom cookies for API calls
-    const { cookies } = await import('next/headers')
-    const cookieStore = await cookies()
-    const backendToken = cookieStore.get('token')?.value
-    const backendUserCookie = cookieStore.get('user')?.value
-    
-    // Parse backend user to get the backend UUID
-    let backendUserId = user.id // fallback to session user id
-    if (backendUserCookie) {
-      try {
-        const backendUser = JSON.parse(backendUserCookie)
-        backendUserId = backendUser.id
-      } catch (e) {
-        console.error('Failed to parse backend user cookie:', e)
-      }
-    }
+    const backendUserId = user.id
 
     if (backendToken) {
       apiClient.setToken(backendToken)

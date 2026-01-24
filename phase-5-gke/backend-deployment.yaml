@@ -5,8 +5,9 @@ metadata:
   namespace: todo-app
   labels:
     app: todo-backend
+    version: 5.0.3
 spec:
-  replicas: 1
+  replicas: 2  # 2 replicas for production
   selector:
     matchLabels:
       app: todo-backend
@@ -14,6 +15,7 @@ spec:
     metadata:
       labels:
         app: todo-backend
+        version: 5.0.3
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "todo-backend"
@@ -23,8 +25,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: todo-backend:5.0.3
-        imagePullPolicy: IfNotPresent  # Use Never for Minikube, IfNotPresent for flexibility
+        image: gcr.io/intense-optics-485323-f3/todo-backend:5.0.3
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
         env:
@@ -44,7 +46,7 @@ spec:
               name: postgres-secret
               key: betterAuthSecret
         - name: BETTER_AUTH_URL
-          value: "http://localhost:3000"
+          value: "http://34.93.106.63"
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
@@ -54,6 +56,8 @@ spec:
           value: "3500"
         - name: DAPR_GRPC_PORT
           value: "50001"
+        - name: APP_PROTOCOL
+          value: "http"
         resources:
           requests:
             memory: "256Mi"
@@ -61,6 +65,18 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
 ---
 apiVersion: v1
 kind: Service
@@ -71,7 +87,8 @@ spec:
   selector:
     app: todo-backend
   ports:
-  - protocol: TCP
+  - name: http
+    protocol: TCP
     port: 8000
     targetPort: 8000
-  type: LoadBalancer
+  type: ClusterIP

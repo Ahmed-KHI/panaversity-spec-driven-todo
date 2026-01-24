@@ -46,11 +46,25 @@ export interface RegisterResponse {
 export interface TaskCreateRequest {
   title: string
   description?: string
+  priority?: string
+  due_date?: string | null
+  is_recurring?: boolean
+  recurrence_pattern?: {
+    frequency: string
+    interval: number
+  }
 }
 
 export interface TaskUpdateRequest {
   title?: string
   description?: string
+  priority?: string
+  due_date?: string | null
+  is_recurring?: boolean
+  recurrence_pattern?: {
+    frequency: string
+    interval: number
+  }
 }
 
 export interface TaskPatchRequest {

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth.config'
 import { cookies } from 'next/headers'
 
 const API_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://todo-backend:8000'
@@ -9,56 +8,36 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { email, password } = body
 
-    // Step 1: Sign in with Better Auth (get frontend session)
-    const betterAuthResult = await auth.api.signInEmail({
-      body: {
+    // Login to FastAPI backend to get JWT token
+    console.log(`[better-login] Attempting backend login to: ${API_URL}/api/auth/login`)
+    console.log(`[better-login] Email: ${email}`)
+    
+    const backendResponse = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         email,
         password,
-      }
+      }),
     })
 
-    if (!betterAuthResult || !betterAuthResult.user) {
+    console.log(`[better-login] Backend response status: ${backendResponse.status}`)
+    const responseText = await backendResponse.text()
+    console.log(`[better-login] Backend response body: ${responseText}`)
+
+    if (!backendResponse.ok) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       )
     }
 
-    // Step 2: Login to FastAPI backend to get JWT token
-    let backendToken: string | null = null
-    let backendUserId: string | null = null
-
-    try {
-      console.log(`[better-login] Attempting backend login to: ${API_URL}/api/auth/login`)
-      console.log(`[better-login] Email: ${email}`)
-      
-      const backendResponse = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-
-      console.log(`[better-login] Backend response status: ${backendResponse.status}`)
-      const responseText = await backendResponse.text()
-      console.log(`[better-login] Backend response body: ${responseText}`)
-
-      if (backendResponse.ok) {
-        const backendData = JSON.parse(responseText)
-        backendToken = backendData.access_token
-        backendUserId = backendData.user.id
-        console.log(`[better-login] Successfully got backend token for user: ${backendUserId}`)
-      } else {
-        console.error(`[better-login] Backend login failed with status ${backendResponse.status}: ${responseText}`)
-      }
-    } catch (backendError) {
-      console.error('[better-login] Failed to login to backend:', backendError)
-      console.error('[better-login] Error details:', JSON.stringify(backendError, Object.getOwnPropertyNames(backendError)))
-    }
+    const backendData = JSON.parse(responseText)
+    const backendToken = backendData.access_token
+    const backendUserId = backendData.user.id
+    console.log(`[better-login] Successfully got backend token for user: ${backendUserId}`)
 
     const cookieStore = await cookies()
 
@@ -67,7 +46,7 @@ export async function POST(request: NextRequest) {
       console.log('[better-login] Setting token cookie')
       cookieStore.set('token', backendToken, {
         httpOnly: true,
-        secure: false, // Disabled for Kubernetes port-forward (HTTP)
+        secure: false,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 7,
         path: '/',
@@ -77,12 +56,12 @@ export async function POST(request: NextRequest) {
     // Store user info with backend user ID
     console.log('[better-login] Setting user cookie with backend ID:', backendUserId)
     cookieStore.set('user', JSON.stringify({
-      id: backendUserId || betterAuthResult.user.id,
-      email: betterAuthResult.user.email,
-      name: betterAuthResult.user.name
+      id: backendUserId,
+      email: backendData.user.email,
+      name: backendData.user.name
     }), {
       httpOnly: true,
-      secure: false, // Disabled for Kubernetes port-forward (HTTP)
+      secure: false,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7,
       path: '/',
@@ -91,9 +70,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       user: {
-        id: backendUserId || betterAuthResult.user.id,
-        email: betterAuthResult.user.email,
-        name: betterAuthResult.user.name
+        id: backendUserId,
+        email: backendData.user.email,
+        name: backendData.user.name
       }
     })
   } catch (error: any) {

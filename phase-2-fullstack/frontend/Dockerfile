@@ -12,9 +12,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# [Task]: INFRA-001 - Disable Turbopack for deterministic CI builds
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_DISABLE_TURBOPACK=1
+
+# Build with optimized settings
 RUN npm run build
 
 # Production image

@@ -5,42 +5,30 @@
  */
 
 import { redirect } from 'next/navigation';
-import { auth } from '@/lib/auth.config';
+import { cookies } from 'next/headers';
 import ChatInterface from '@/components/ChatInterface';
 import Link from 'next/link';
 
 export default async function ChatPage() {
-  // Use Better Auth session
-  const session = await auth.api.getSession({
-    headers: await import('next/headers').then(m => m.headers())
-  });
-
-  if (!session?.user) {
-    redirect('/login');
-  }
-
-  const user = session.user;
-
-  // Get backend token and user from cookies for API calls
-  const { cookies } = await import('next/headers');
+  // Check authentication via backend cookies
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
   const backendUserCookie = cookieStore.get('user')?.value;
 
-  if (!token) {
+  if (!token || !backendUserCookie) {
     redirect('/login');
   }
 
-  // Parse backend user to get the backend UUID
-  let backendUserId = user.id; // fallback
-  if (backendUserCookie) {
-    try {
-      const backendUser = JSON.parse(backendUserCookie);
-      backendUserId = backendUser.id;
-    } catch (e) {
-      console.error('Failed to parse backend user cookie:', e);
-    }
+  // Parse backend user
+  let user: any;
+  try {
+    user = JSON.parse(backendUserCookie);
+  } catch (e) {
+    console.error('Failed to parse user cookie:', e);
+    redirect('/login');
   }
+
+  const backendUserId = user.id;
   
   return (
     <div className="min-h-screen bg-gray-50">

@@ -11,6 +11,11 @@ interface TaskFormProps {
 export default function TaskForm({ userId, onTaskCreated }: TaskFormProps) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [priority, setPriority] = useState('medium')
+  const [dueDate, setDueDate] = useState('')
+  const [tags, setTags] = useState('')
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurrenceFrequency, setRecurrenceFrequency] = useState('daily')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -20,10 +25,26 @@ export default function TaskForm({ userId, onTaskCreated }: TaskFormProps) {
     setLoading(true)
 
     try {
+      const taskData: any = { 
+        userId, 
+        title, 
+        description,
+        priority,
+        due_date: dueDate || null,
+        is_recurring: isRecurring
+      }
+
+      if (isRecurring) {
+        taskData.recurrence_pattern = {
+          frequency: recurrenceFrequency,
+          interval: 1
+        }
+      }
+
       const response = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, title, description }),
+        body: JSON.stringify(taskData),
       })
 
       if (!response.ok) {
@@ -35,6 +56,11 @@ export default function TaskForm({ userId, onTaskCreated }: TaskFormProps) {
       onTaskCreated(newTask)
       setTitle('')
       setDescription('')
+      setPriority('medium')
+      setDueDate('')
+      setTags('')
+      setIsRecurring(false)
+      setRecurrenceFrequency('daily')
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -80,6 +106,68 @@ export default function TaskForm({ userId, onTaskCreated }: TaskFormProps) {
           placeholder="Enter task description (optional)"
         />
       </div>
+
+      <div>
+        <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
+          Priority
+        </label>
+        <select
+          id="priority"
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-gray-900"
+        >
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+          <option value="urgent">Urgent</option>
+        </select>
+      </div>
+
+      <div>
+        <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+          Due Date
+        </label>
+        <input
+          type="datetime-local"
+          id="dueDate"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-gray-900"
+        />
+      </div>
+
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          id="isRecurring"
+          checked={isRecurring}
+          onChange={(e) => setIsRecurring(e.target.checked)}
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label htmlFor="isRecurring" className="ml-2 block text-sm text-gray-700">
+          Recurring Task
+        </label>
+      </div>
+
+      {isRecurring && (
+        <div>
+          <label htmlFor="recurrence" className="block text-sm font-medium text-gray-700">
+            Recurrence
+          </label>
+          <select
+            id="recurrence"
+            value={recurrenceFrequency}
+            onChange={(e) => setRecurrenceFrequency(e.target.value)}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-gray-900"
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+      )}
 
       <button
         type="submit"

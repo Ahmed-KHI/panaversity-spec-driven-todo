@@ -8,35 +8,64 @@ All tools enforce user isolation through user_id filtering.
 """
 
 from sqlmodel import Session, select, col
-from src.models.task import Task
+from src.models.task import Task, Priority, RecurrenceFrequency
 from uuid import UUID
 from typing import Dict, Any, Optional
+from datetime import datetime
 
 
 def add_task(
     session: Session,
     user_id: UUID,
     title: str,
-    description: Optional[str] = None
+    description: Optional[str] = None,
+    priority: Optional[str] = "medium",
+    due_date: Optional[str] = None,
+    is_recurring: Optional[bool] = False,
+    recurrence_frequency: Optional[str] = "daily"
 ) -> Dict[str, Any]:
     """
-    Create a new task for the user.
+    Create a new task for the user with Phase 5 advanced features.
     
     Args:
         session: Database session
         user_id: User UUID from JWT token
         title: Task title (1-200 characters)
         description: Optional task description
+        priority: Task priority (low, medium, high, urgent)
+        due_date: Due date in ISO format (YYYY-MM-DDTHH:MM:SS)
+        is_recurring: Whether task repeats
+        recurrence_frequency: How often it repeats (daily, weekly, monthly, yearly)
         
     Returns:
-        {"task_id": int, "status": "created", "title": str, "description": str}
+        {"task_id": int, "status": "created", "title": str, "priority": str, "due_date": str, "is_recurring": bool}
     """
     try:
+        # Parse due_date if provided
+        parsed_due_date = None
+        if due_date:
+            try:
+                parsed_due_date = datetime.fromisoformat(due_date.replace('Z', '+00:00'))
+            except:
+                pass  # Invalid date format, skip
+        
+        # Build recurrence pattern if recurring
+        recurrence_pattern = None
+        if is_recurring:
+            recurrence_pattern = {
+                "frequency": recurrence_frequency,
+                "interval": 1
+            }
+        
         task = Task(
             user_id=user_id,
             title=title,
             description=description,
-            completed=False
+            completed=False,
+            priority=Priority(priority) if priority in ["low", "medium", "high", "urgent"] else Priority.MEDIUM,
+            due_date=parsed_due_date,
+            is_recurring=is_recurring,
+            recurrence_pattern=recurrence_pattern
         )
         session.add(task)
         session.commit()
@@ -46,7 +75,10 @@ def add_task(
             "task_id": task.id,
             "status": "created",
             "title": task.title,
-            "description": task.description
+            "description": task.description,
+            "priority": task.priority.value if task.priority else "medium",
+            "due_date": task.due_date.isoformat() if task.due_date else None,
+            "is_recurring": task.is_recurring
         }
     except Exception as e:
         session.rollback()

@@ -12,10 +12,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { userId, title, description } = body
+    const { userId, ...taskData } = body
 
     apiClient.setToken(token)
-    const task = await apiClient.createTask(userId, { title, description })
+    const task = await apiClient.createTask(userId, taskData)
 
     return NextResponse.json(task, { status: 201 })
   } catch (error: any) {

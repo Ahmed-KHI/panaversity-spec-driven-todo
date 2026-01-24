@@ -46,10 +46,8 @@ What would you like to do?`
   const [conversationId, setConversationId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Hardcoded API URL for Kubernetes port-forward scenario
-  // For production cloud deployment, use Kubernetes service DNS or Ingress
-  const apiUrl = 'http://localhost:8000';
-
+  // Use Next.js API route (server-side proxy to backend)
+  // This allows the frontend to call /api/chat which proxies to Kubernetes backend
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -71,12 +69,13 @@ What would you like to do?`
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/api/${userId}/chat`, {
+      // Call Next.js API route which proxies to backend
+      const response = await fetch(`/api/chat/${userId}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // Include cookies for authentication
         body: JSON.stringify({
           conversation_id: conversationId,
           message: userMessage
@@ -182,7 +181,7 @@ What would you like to do?`
           📦 Installed and ready • Powered by OpenAI Agents SDK • MCP Tools Active
         </p>
         <p className="text-green-600 mt-1 text-xs">
-          Backend: {apiUrl}/api/{userId}/chat
+          Backend: {process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/{userId}/chat
         </p>
       </div>
     </div>
