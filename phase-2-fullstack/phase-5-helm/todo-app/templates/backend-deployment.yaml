@@ -1,0 +1,85 @@
+# [Task]: T-E-006
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.6
+
+{{- if .Values.backend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo-app.fullname" . }}-backend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "todo-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        {{- include "todo-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+      annotations:
+        {{- if .Values.backend.dapr.enabled }}
+        dapr.io/enabled: "true"
+        dapr.io/app-id: {{ .Values.backend.dapr.appId | quote }}
+        dapr.io/app-port: {{ .Values.backend.dapr.appPort | quote }}
+        dapr.io/app-protocol: "http"
+        dapr.io/log-level: {{ .Values.backend.dapr.logLevel | quote }}
+        dapr.io/enable-metrics: "true"
+        dapr.io/metrics-port: "9090"
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "todo-app.serviceAccountName" . }}-backend
+      containers:
+      - name: backend
+        image: {{ include "todo-app.backend.image" . }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.backend.service.targetPort }}
+          protocol: TCP
+        env:
+        {{- range $key, $value := .Values.backend.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.secrets.postgresSecretName }}
+              key: connection-string
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.secrets.appSecretName }}
+              key: better-auth-secret
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.secrets.appSecretName }}
+              key: jwt-secret
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.secrets.appSecretName }}
+              key: openai-api-key
+        resources:
+          {{- toYaml .Values.backend.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+{{- end }}

@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-backend
+  namespace: todo-app
+  labels:
+    app: todo-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-backend
+  template:
+    metadata:
+      labels:
+        app: todo-backend
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "todo-backend"
+        dapr.io/app-port: "8000"
+        dapr.io/log-level: "info"
+        dapr.io/enable-api-logging: "true"
+    spec:
+      containers:
+      - name: backend
+        image: todo-backend:5.0.0
+        imagePullPolicy: IfNotPresent  # Use Never for Minikube, IfNotPresent for flexibility
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: connectionString
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: jwtSecret
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: betterAuthSecret
+        - name: BETTER_AUTH_URL
+          value: "http://localhost:3000"
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: openaiApiKey
+        - name: DAPR_HTTP_PORT
+          value: "3500"
+        - name: DAPR_GRPC_PORT
+          value: "50001"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-backend
+  namespace: todo-app
+spec:
+  selector:
+    app: todo-backend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: 8000
+  type: LoadBalancer

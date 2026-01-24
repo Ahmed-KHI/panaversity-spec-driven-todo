@@ -69,15 +69,31 @@ Always:
     # Call OpenAI Chat Completions API
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo-preview",
+            model="gpt-4o",  # Updated to current stable model (was gpt-4-turbo-preview)
             messages=cast(Any, full_messages),
             tools=cast(Any, tools),
             tool_choice="auto",
-            max_tokens=500
+            max_tokens=1000,
+            temperature=0.7
         )
+    except openai.AuthenticationError as e:
+        return {
+            "response": "⚠️ OpenAI API authentication failed. Please check your API key configuration.",
+            "tool_calls": []
+        }
+    except openai.RateLimitError as e:
+        return {
+            "response": "⚠️ OpenAI API rate limit exceeded. Please try again in a moment.",
+            "tool_calls": []
+        }
+    except openai.APIConnectionError as e:
+        return {
+            "response": "⚠️ Could not connect to OpenAI API. Please check your internet connection.",
+            "tool_calls": []
+        }
     except Exception as e:
         return {
-            "response": f"I'm having trouble connecting to my AI service. Please try again in a moment. (Error: {str(e)})",
+            "response": f"⚠️ AI service error: {str(e)}",
             "tool_calls": []
         }
     

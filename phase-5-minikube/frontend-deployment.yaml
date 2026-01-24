@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-frontend
+  namespace: todo-app
+  labels:
+    app: todo-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-frontend
+  template:
+    metadata:
+      labels:
+        app: todo-frontend
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "todo-frontend"
+        dapr.io/app-port: "3000"
+    spec:
+      containers:
+      - name: frontend
+        image: todo-frontend:5.0.2
+        imagePullPolicy: IfNotPresent  # Use Never for Minikube, IfNotPresent for flexibility
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://localhost:8000"
+        - name: API_URL
+          value: "http://todo-backend.todo-app.svc.cluster.local:8000"
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: betterAuthSecret
+        - name: BETTER_AUTH_URL
+          value: "http://localhost:3000"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: connectionString
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-frontend
+  namespace: todo-app
+spec:
+  selector:
+    app: todo-frontend
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+  type: LoadBalancer

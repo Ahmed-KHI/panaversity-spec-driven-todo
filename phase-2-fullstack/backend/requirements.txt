@@ -28,3 +28,7 @@ python-multipart>=0.0.17
 
 # Additional dependencies for production
 requests>=2.31.0
+
+# Phase V: Kafka and Dapr integration
+kafka-python>=2.0.2
+httpx>=0.28.0

@@ -1,0 +1,191 @@
+# [Task]: T-E-007
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.7
+
+# Default values for todo-app Helm chart
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Global settings
+global:
+  environment: production
+  domain: your-domain.com
+
+# Namespace
+namespace: todo-app
+
+# Image registry
+imageRegistry: ghcr.io/ahmed-khi
+imagePullPolicy: Always
+
+# Backend configuration
+backend:
+  enabled: true
+  replicaCount: 3
+  
+  image:
+    repository: todo-backend
+    tag: v5.0.0
+  
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  
+  dapr:
+    enabled: true
+    appId: backend-service
+    appPort: 8000
+    logLevel: info
+  
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+  
+  env:
+    APP_VERSION: "5.0.0"
+    ENVIRONMENT: production
+    KAFKA_ENABLED: "true"
+    KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+    DAPR_HTTP_ENDPOINT: "http://localhost:3500"
+  
+  secrets:
+    # These should be created separately or via external-secrets
+    postgresSecretName: postgres-secrets
+    appSecretName: app-secrets
+
+# Frontend configuration
+frontend:
+  enabled: true
+  replicaCount: 3
+  
+  image:
+    repository: todo-frontend
+    tag: v5.0.0
+  
+  service:
+    type: LoadBalancer  # Change to ClusterIP if using Ingress
+    port: 80
+    targetPort: 3000
+  
+  dapr:
+    enabled: true
+    appId: frontend-service
+    appPort: 3000
+    logLevel: info
+  
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  
+  env:
+    NODE_ENV: production
+    NEXT_PUBLIC_API_URL: "http://backend:8000"
+
+# Ingress configuration
+ingress:
+  enabled: false  # Set to true to enable Ingress
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  
+  hosts:
+    - host: todo.your-domain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: frontend
+    - host: api.todo.your-domain.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: backend
+  
+  tls:
+    - secretName: todo-tls-cert
+      hosts:
+        - todo.your-domain.com
+        - api.todo.your-domain.com
+
+# Dapr configuration
+dapr:
+  enabled: true
+  components:
+    kafkaPubsub:
+      enabled: true
+      brokers: "kafka:9092"
+      consumerGroup: "todo-service"
+    
+    stateStore:
+      enabled: true
+      connectionStringSecret: postgres-secrets
+    
+    secrets:
+      enabled: true
+
+# Database configuration (external)
+database:
+  # For external PostgreSQL (e.g., Neon, AWS RDS)
+  external: true
+  host: ""  # Set via secrets
+  port: 5432
+  name: tododb
+  # Connection string provided via secrets
+
+# Kafka configuration (external or in-cluster)
+kafka:
+  # Use external Redpanda Cloud or deploy in-cluster
+  external: true
+  brokers: "kafka:9092"  # Update for production
+  
+  # If deploying Kafka in-cluster (using Strimzi)
+  inCluster:
+    enabled: false
+    replicas: 3
+    storage:
+      size: 10Gi
+
+# Service Accounts
+serviceAccount:
+  create: true
+  annotations: {}
+
+# RBAC
+rbac:
+  create: true
+
+# Security
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+# Monitoring
+monitoring:
+  enabled: false
+  prometheus:
+    enabled: false
+  grafana:
+    enabled: false
+
+# Autoscaling
+autoscaling:
+  backend:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+  
+  frontend:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80

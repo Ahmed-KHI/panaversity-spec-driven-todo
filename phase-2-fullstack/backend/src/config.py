@@ -26,10 +26,16 @@ class Settings(BaseSettings):
     
     # Application
     APP_NAME: str = "Todo Management API"
-    APP_VERSION: str = "1.0.0"
+    APP_VERSION: str = "5.0.0"
     
     # Phase III: OpenAI
     OPENAI_API_KEY: str
+    
+    # Phase V: Dapr Integration
+    DAPR_HTTP_ENDPOINT: str = "http://localhost:3500"
+    DAPR_GRPC_ENDPOINT: str = "http://localhost:50001"
+    KAFKA_ENABLED: str = "false"
+    KAFKA_BOOTSTRAP_SERVERS: str = "localhost:9092"
     
     model_config = SettingsConfigDict(
         env_file=".env",

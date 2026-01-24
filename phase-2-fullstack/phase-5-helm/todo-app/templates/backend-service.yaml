@@ -1,0 +1,23 @@
+# [Task]: T-E-006
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.6
+
+{{- if .Values.backend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-app.fullname" . }}-backend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  selector:
+    {{- include "todo-app.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+  ports:
+  - name: http
+    port: {{ .Values.backend.service.port }}
+    targetPort: {{ .Values.backend.service.targetPort }}
+    protocol: TCP
+{{- end }}

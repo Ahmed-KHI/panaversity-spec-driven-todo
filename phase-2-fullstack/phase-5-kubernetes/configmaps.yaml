@@ -1,0 +1,99 @@
+# [Task]: T-E-004
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.4
+
+---
+# ConfigMap for Backend Application Settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: todo-app
+data:
+  APP_NAME: "Todo Management API"
+  APP_VERSION: "5.0.0"
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "info"
+  
+  # CORS Configuration
+  CORS_ORIGINS: "https://your-frontend-domain.com,http://localhost:3000"
+  
+  # Dapr Configuration
+  DAPR_HTTP_ENDPOINT: "http://localhost:3500"
+  DAPR_GRPC_ENDPOINT: "http://localhost:50001"
+  
+  # Kafka Configuration
+  KAFKA_ENABLED: "true"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+
+---
+# ConfigMap for Frontend Application Settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: todo-app
+data:
+  NODE_ENV: "production"
+  NEXT_PUBLIC_APP_NAME: "Todo Management"
+  NEXT_PUBLIC_API_URL: "http://backend:8000"
+  BETTER_AUTH_URL: "https://your-frontend-domain.com"
+
+---
+# ConfigMap for Nginx (if using as reverse proxy)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: todo-app
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+    
+    http {
+        upstream backend {
+            server backend:8000;
+        }
+        
+        upstream frontend {
+            server frontend:3000;
+        }
+        
+        server {
+            listen 80;
+            server_name _;
+            
+            # Frontend
+            location / {
+                proxy_pass http://frontend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+            
+            # Backend API
+            location /api {
+                proxy_pass http://backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+            }
+            
+            # Backend Auth
+            location /api/auth {
+                proxy_pass http://backend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+            }
+            
+            # Health Check
+            location /health {
+                access_log off;
+                return 200 "healthy\n";
+                add_header Content-Type text/plain;
+            }
+        }
+    }

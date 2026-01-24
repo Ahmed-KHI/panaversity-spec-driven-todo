@@ -46,7 +46,9 @@ What would you like to do?`
   const [conversationId, setConversationId] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  // Hardcoded API URL for Kubernetes port-forward scenario
+  // For production cloud deployment, use Kubernetes service DNS or Ingress
+  const apiUrl = 'http://localhost:8000';
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

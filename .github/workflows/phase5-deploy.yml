@@ -1,0 +1,259 @@
+# Phase V: CI/CD Pipeline for Kubernetes Deployment
+# [Task]: T-E-010 (CI/CD Setup)
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md
+
+name: Phase V - Build and Deploy
+
+on:
+  push:
+    branches: [main, phase-5]
+    paths:
+      - 'phase-2-fullstack/backend/**'
+      - 'phase-2-fullstack/frontend/**'
+      - 'phase-5-minikube/**'
+      - '.github/workflows/phase5-deploy.yml'
+  pull_request:
+    branches: [main, phase-5]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ${{ github.repository }}/todo-backend
+  FRONTEND_IMAGE: ${{ github.repository }}/todo-frontend
+  VERSION: 5.0.${{ github.run_number }}
+
+jobs:
+  build-backend:
+    name: Build Backend Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}
+          tags: |
+            type=raw,value=${{ env.VERSION }}
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-
+      
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./phase-2-fullstack/backend
+          file: ./phase-2-fullstack/backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Output image tags
+        run: echo "Backend image built - ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}"
+
+  build-frontend:
+    name: Build Frontend Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}
+          tags: |
+            type=raw,value=${{ env.VERSION }}
+            type=raw,value=latest
+            type=sha,prefix={{branch}}-
+      
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./phase-2-fullstack/frontend
+          file: ./phase-2-fullstack/frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Output image tags
+        run: echo "Frontend image built - ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}"
+
+  deploy-minikube:
+    name: Test on Minikube
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.event_name != 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Start Minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          cpus: 2
+          memory: 4096
+          kubernetes-version: stable
+      
+      - name: Install Dapr CLI
+        run: |
+          wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+      
+      - name: Initialize Dapr on Kubernetes
+        run: |
+          dapr init -k --wait --timeout 300
+      
+      - name: Install Strimzi Kafka Operator
+        run: |
+          kubectl create namespace kafka
+          kubectl create -f 'https://strimzi.io/install/latest?namespace=kafka' -n kafka
+          kubectl wait --for=condition=ready pod -l name=strimzi-cluster-operator -n kafka --timeout=300s
+      
+      - name: Deploy application
+        run: |
+          kubectl create namespace todo-app
+          kubectl apply -f phase-5-minikube/namespace.yaml
+          kubectl apply -f phase-5-minikube/secrets.yaml
+          kubectl apply -f phase-5-minikube/kafka-cluster-v1.yaml
+          
+          # Wait for Kafka
+          sleep 60
+          
+          kubectl apply -f phase-5-minikube/postgres-deployment.yaml
+          kubectl apply -f phase-5-minikube/kafka-pubsub.yaml
+          kubectl apply -f phase-5-minikube/statestore.yaml
+          
+          # Update image tags
+          sed -i "s|todo-backend:5.0.0|${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}|g" phase-5-minikube/backend-deployment.yaml
+          sed -i "s|todo-frontend:5.0.0|${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}|g" phase-5-minikube/frontend-deployment.yaml
+          sed -i "s|imagePullPolicy: IfNotPresent|imagePullPolicy: Always|g" phase-5-minikube/backend-deployment.yaml
+          sed -i "s|imagePullPolicy: IfNotPresent|imagePullPolicy: Always|g" phase-5-minikube/frontend-deployment.yaml
+          
+          kubectl apply -f phase-5-minikube/backend-deployment.yaml
+          kubectl apply -f phase-5-minikube/frontend-deployment.yaml
+      
+      - name: Wait for deployment
+        run: |
+          kubectl wait --for=condition=ready pod -l app=postgres -n todo-app --timeout=120s
+          kubectl wait --for=condition=ready pod -l app=todo-backend -n todo-app --timeout=180s || true
+          kubectl wait --for=condition=ready pod -l app=todo-frontend -n todo-app --timeout=180s || true
+      
+      - name: Check deployment status
+        run: |
+          echo "=== Pods ==="
+          kubectl get pods -n todo-app
+          kubectl get pods -n kafka
+          
+          echo "=== Services ==="
+          kubectl get svc -n todo-app
+          
+          echo "=== Events ==="
+          kubectl get events -n todo-app --sort-by='.lastTimestamp' | tail -20
+      
+      - name: Get logs on failure
+        if: failure()
+        run: |
+          echo "=== Backend Logs ==="
+          kubectl logs -n todo-app -l app=todo-backend --tail=100 || true
+          
+          echo "=== Frontend Logs ==="
+          kubectl logs -n todo-app -l app=todo-frontend --tail=100 || true
+          
+          echo "=== Pod Descriptions ==="
+          kubectl describe pods -n todo-app || true
+
+  deploy-cloud:
+    name: Deploy to Cloud (Manual)
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend, deploy-minikube]
+    if: github.event_name == 'workflow_dispatch'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Cloud deployment notice
+        run: |
+          echo "=================================="
+          echo "Cloud Deployment Configuration"
+          echo "=================================="
+          echo ""
+          echo "Images built:"
+          echo "  Backend:  ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}"
+          echo "  Frontend: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}"
+          echo ""
+          echo "To deploy to cloud Kubernetes:"
+          echo "1. Configure kubectl for your cloud provider (OKE/AKS/GKE)"
+          echo "2. Update secrets in phase-5-kubernetes/secrets.yaml"
+          echo "3. Run deployment commands:"
+          echo ""
+          echo "   kubectl apply -f phase-5-kubernetes/namespace.yaml"
+          echo "   kubectl apply -f phase-5-kubernetes/secrets.yaml"
+          echo "   kubectl apply -f phase-5-kubernetes/configmaps.yaml"
+          echo "   kubectl apply -f phase-5-kubernetes/rbac.yaml"
+          echo "   kubectl apply -f phase-5-kubernetes/backend-deployment.yaml"
+          echo "   kubectl apply -f phase-5-kubernetes/frontend-deployment.yaml"
+          echo "   kubectl apply -f phase-5-kubernetes/ingress.yaml"
+          echo ""
+          echo "Or use Helm:"
+          echo "   helm upgrade --install todo-app phase-5-helm/todo-app \\"
+          echo "     --namespace todo-app \\"
+          echo "     --set backend.image.tag=${{ env.VERSION }} \\"
+          echo "     --set frontend.image.tag=${{ env.VERSION }}"
+          echo ""
+
+  summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: always()
+    
+    steps:
+      - name: Print summary
+        run: |
+          echo "# Phase V Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Images Built" >> $GITHUB_STEP_SUMMARY
+          echo "- Backend: \`${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: \`${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE }}:${{ env.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Pull images: \`docker pull ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE }}:${{ env.VERSION }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "2. Deploy to Minikube: Use \`phase-5-scripts/deploy-phase5-complete.sh\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Deploy to Cloud: Configure cloud credentials and use Helm charts" >> $GITHUB_STEP_SUMMARY

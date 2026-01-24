@@ -1,0 +1,67 @@
+# [Task]: T-E-001
+# [From]: specs/005-phase-v-cloud/phase5-cloud.specify.md §6,
+#         specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.1
+
+---
+# Service Account for Backend Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backend-service-account
+  namespace: todo-app
+  labels:
+    app: backend
+
+---
+# Service Account for Frontend Service
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend-service-account
+  namespace: todo-app
+  labels:
+    app: frontend
+
+---
+# Role for accessing secrets
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-reader
+  namespace: todo-app
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list"]
+
+---
+# RoleBinding for backend service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: backend-secret-reader
+  namespace: todo-app
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secret-reader
+subjects:
+- kind: ServiceAccount
+  name: backend-service-account
+  namespace: todo-app
+
+---
+# RoleBinding for frontend service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: frontend-secret-reader
+  namespace: todo-app
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: secret-reader
+subjects:
+- kind: ServiceAccount
+  name: frontend-service-account
+  namespace: todo-app

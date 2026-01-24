@@ -1,0 +1,94 @@
+# [Task]: T-E-006
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.6
+
+{{- if .Values.frontend.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "todo-app.fullname" . }}-frontend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "todo-app.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        {{- include "todo-app.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: frontend
+      annotations:
+        {{- if .Values.frontend.dapr.enabled }}
+        dapr.io/enabled: "true"
+        dapr.io/app-id: {{ .Values.frontend.dapr.appId | quote }}
+        dapr.io/app-port: {{ .Values.frontend.dapr.appPort | quote }}
+        dapr.io/app-protocol: "http"
+        dapr.io/log-level: {{ .Values.frontend.dapr.logLevel | quote }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "todo-app.serviceAccountName" . }}-frontend
+      containers:
+      - name: frontend
+        image: {{ include "todo-app.frontend.image" . }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.frontend.service.targetPort }}
+          protocol: TCP
+        env:
+        {{- range $key, $value := .Values.frontend.env }}
+        - name: {{ $key }}
+          value: {{ $value | quote }}
+        {{- end }}
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.secrets.appSecretName }}
+              key: better-auth-secret
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.backend.secrets.postgresSecretName }}
+              key: connection-string
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+{{- end }}
+---
+{{- if .Values.frontend.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "todo-app.fullname" . }}-frontend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "todo-app.labels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  selector:
+    {{- include "todo-app.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: frontend
+  ports:
+  - name: http
+    port: {{ .Values.frontend.service.port }}
+    targetPort: {{ .Values.frontend.service.targetPort }}
+    protocol: TCP
+{{- end }}

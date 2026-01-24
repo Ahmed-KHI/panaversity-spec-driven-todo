@@ -1,0 +1,27 @@
+# [Task]: T-E-006
+# [From]: specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.6-E.7
+
+apiVersion: v2
+name: todo-app
+description: A Helm chart for Todo Management Application (Phase V)
+type: application
+version: 5.0.0
+appVersion: "5.0.0"
+
+keywords:
+  - todo
+  - task-management
+  - dapr
+  - kafka
+  - kubernetes
+
+maintainers:
+  - name: Ahmed KHI
+    email: ahmed@example.com
+    url: https://github.com/Ahmed-KHI
+
+dependencies: []
+
+annotations:
+  category: Application
+  licenses: MIT

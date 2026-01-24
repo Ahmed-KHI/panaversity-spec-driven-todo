@@ -1,0 +1,9 @@
+{
+  "venvPath": ".",
+  "venv": ".venv",
+  "extraPaths": ["src"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false
+}

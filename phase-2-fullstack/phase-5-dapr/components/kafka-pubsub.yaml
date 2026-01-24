@@ -1,0 +1,65 @@
+# [Task]: T-D-001
+# [From]: specs/005-phase-v-cloud/phase5-cloud.specify.md §3.1,
+#         specs/005-phase-v-cloud/phase5-cloud.plan.md §5.1.1,
+#         specs/005-phase-v-cloud/phase5-cloud.tasks.md §D.1
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+  namespace: todo-app
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+  # Kafka Broker Configuration
+  - name: brokers
+    value: "kafka:9092"  # For local: kafka:9092, For cloud: Use Redpanda URL from secret
+  
+  # Consumer Group
+  - name: consumerGroup
+    value: "todo-service"
+  
+  # Consumer ID (for uniqueness)
+  - name: consumerID
+    value: "backend-service"
+  
+  # Client ID
+  - name: clientID
+    value: "todo-backend"
+  
+  # Authentication - For Production (Redpanda Cloud)
+  # Uncomment and configure when deploying to cloud with SASL authentication
+  # - name: authType
+  #   value: "password"
+  # - name: saslUsername
+  #   secretKeyRef:
+  #     name: kafka-secrets
+  #     key: sasl-username
+  # - name: saslPassword
+  #   secretKeyRef:
+  #     name: kafka-secrets
+  #     key: sasl-password
+  # - name: saslMechanism
+  #   value: "SCRAM-SHA-512"
+  
+  # TLS Configuration (for cloud)
+  # - name: skipVerify
+  #   value: "false"
+  
+  # Topic Configuration
+  - name: initialOffset
+    value: "newest"  # Start from newest messages
+  
+  # Performance Settings
+  - name: maxMessageBytes
+    value: "1024000"  # 1MB
+  
+  # Retry Policy
+  - name: version
+    value: "2.8.0"  # Kafka protocol version
+
+scopes:
+- backend-service
+- recurring-task-service
+- notification-service

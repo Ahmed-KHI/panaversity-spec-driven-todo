@@ -1,0 +1,121 @@
+# [Task]: T-E-003
+# [From]: specs/005-phase-v-cloud/phase5-cloud.specify.md §6,
+#         specs/005-phase-v-cloud/phase5-cloud.plan.md §6.2,
+#         specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.3
+
+---
+# Frontend Deployment with Dapr Sidecar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: todo-app
+  labels:
+    app: frontend
+    version: v5.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: v5.0.0
+      annotations:
+        # Dapr Configuration
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "frontend-service"
+        dapr.io/app-port: "3000"
+        dapr.io/app-protocol: "http"
+        dapr.io/log-level: "info"
+    spec:
+      serviceAccountName: frontend-service-account
+      containers:
+      - name: frontend
+        image: ghcr.io/ahmed-khi/todo-frontend:v5.0.0  # Update with your registry
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
+        env:
+        # Backend API URL
+        - name: NEXT_PUBLIC_API_URL
+          value: "http://backend:8000"
+        
+        # Better Auth Configuration
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: better-auth-secret
+        
+        - name: BETTER_AUTH_URL
+          value: "https://your-frontend-domain.com"  # Update for production
+        
+        # Database (for Better Auth sessions)
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: connection-string
+        
+        # Environment
+        - name: NODE_ENV
+          value: "production"
+        
+        # Resource Limits
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        
+        # Health Checks
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Security Context
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+
+---
+# Frontend Service (LoadBalancer for external access)
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: todo-app
+  labels:
+    app: frontend
+spec:
+  type: LoadBalancer  # Change to ClusterIP if using Ingress
+  selector:
+    app: frontend
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  sessionAffinity: ClientIP

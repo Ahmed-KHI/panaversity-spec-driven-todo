@@ -1,0 +1,12 @@
+# [Task]: T-E-001
+# [From]: specs/005-phase-v-cloud/phase5-cloud.specify.md §6,
+#         specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.1
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: todo-app
+  labels:
+    name: todo-app
+    env: production
+    project: panaversity-hackathon

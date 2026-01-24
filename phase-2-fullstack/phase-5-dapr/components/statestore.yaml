@@ -1,0 +1,50 @@
+# [Task]: T-D-002
+# [From]: specs/005-phase-v-cloud/phase5-cloud.specify.md §3.1,
+#         specs/005-phase-v-cloud/phase5-cloud.plan.md §5.1.2,
+#         specs/005-phase-v-cloud/phase5-cloud.tasks.md §D.2
+
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: statestore
+  namespace: todo-app
+spec:
+  type: state.postgresql
+  version: v1
+  metadata:
+  # Connection String from Kubernetes Secret
+  - name: connectionString
+    secretKeyRef:
+      name: postgres-secrets
+      key: connection-string
+  
+  # Table Configuration
+  - name: tableName
+    value: "dapr_state"
+  
+  # Metadata Table
+  - name: metadataTableName
+    value: "dapr_metadata"
+  
+  # Timeout Settings
+  - name: timeout
+    value: "30"  # seconds
+  
+  # Cleanup Interval for expired items
+  - name: cleanupIntervalInSeconds
+    value: "3600"  # 1 hour
+  
+  # Connection Pool Settings
+  - name: maxConns
+    value: "10"
+  
+  - name: connectionMaxIdleTime
+    value: "0"  # Keep connections alive
+  
+  # Actor State Store Configuration (if using Dapr Actors)
+  - name: actorStateStore
+    value: "true"
+
+scopes:
+- backend-service
+- notification-service

@@ -1,0 +1,153 @@
+# [Task]: T-E-002
+# [From]: specs/005-phase-v-cloud/phase5-cloud.specify.md §6,
+#         specs/005-phase-v-cloud/phase5-cloud.plan.md §6.1,
+#         specs/005-phase-v-cloud/phase5-cloud.tasks.md §E.2
+
+---
+# Backend Deployment with Dapr Sidecar
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: todo-app
+  labels:
+    app: backend
+    version: v5.0.0
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+        version: v5.0.0
+      annotations:
+        # Dapr Configuration
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "backend-service"
+        dapr.io/app-port: "8000"
+        dapr.io/app-protocol: "http"
+        dapr.io/log-level: "info"
+        dapr.io/enable-metrics: "true"
+        dapr.io/metrics-port: "9090"
+    spec:
+      serviceAccountName: backend-service-account
+      containers:
+      - name: backend
+        image: ghcr.io/ahmed-khi/todo-backend:v5.0.0  # Update with your registry
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8000
+          protocol: TCP
+        env:
+        # Database Configuration
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: connection-string
+        
+        # Authentication
+        - name: BETTER_AUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: better-auth-secret
+        
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: jwt-secret
+        
+        # OpenAI API
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: openai-api-key
+        
+        # Dapr Configuration
+        - name: DAPR_HTTP_ENDPOINT
+          value: "http://localhost:3500"
+        
+        - name: DAPR_GRPC_ENDPOINT
+          value: "http://localhost:50001"
+        
+        # Kafka Configuration
+        - name: KAFKA_ENABLED
+          value: "true"
+        
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "kafka:9092"  # Update for cloud: Redpanda URL
+        
+        # Application Configuration
+        - name: ENVIRONMENT
+          value: "production"
+        
+        - name: CORS_ORIGINS
+          value: "https://your-frontend-domain.com,http://localhost:3000"
+        
+        - name: APP_VERSION
+          value: "5.0.0"
+        
+        # Resource Limits
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+        
+        # Health Checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Security Context
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: false
+
+---
+# Backend Service (ClusterIP)
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: todo-app
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+  - name: http
+    port: 8000
+    targetPort: 8000
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP

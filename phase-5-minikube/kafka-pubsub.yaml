@@ -1,0 +1,21 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+  namespace: todo-app
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+    - name: brokers
+      value: "todo-kafka-kafka-bootstrap.kafka.svc.cluster.local:9092"
+    - name: authType
+      value: "none"
+    - name: maxMessageBytes
+      value: "1024"
+    - name: consumerGroup
+      value: "todo-app-group"
+    - name: clientId
+      value: "todo-app"
+    - name: initialOffset
+      value: "newest"

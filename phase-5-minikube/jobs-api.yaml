@@ -1,0 +1,17 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: jobs-api
+  namespace: todo-app
+spec:
+  type: bindings.cron
+  version: v1
+  metadata:
+    - name: direction
+      value: "input"
+    - name: schedule
+      value: "*/5 * * * *"  # Every 5 minutes (for reminder checks)
+---
+# Note: Dapr Jobs API (v1.0-alpha1) is used via HTTP endpoint
+# No separate component YAML needed - Jobs are created via API calls
+# This cron binding is for legacy reminder processing if needed
