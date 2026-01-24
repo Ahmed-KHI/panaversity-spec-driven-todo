@@ -1,6 +1,15 @@
 ﻿# Panaversity Spec-Driven Todo - Multi-Phase Evolution
 
-A comprehensive demonstration of **Spec-Driven Development** methodology across multiple phases of the GIAIC Hackathon II: "The Evolution of Todo".
+> **🏆 Enterprise-Grade Todo Application | GIAIC Hackathon II: "The Evolution of Todo"**
+
+[![Production Status](https://img.shields.io/badge/Production-Live-success?style=for-the-badge)](http://34.93.106.63)
+[![Phase V](https://img.shields.io/badge/Phase%20V-Completed-blue?style=for-the-badge)](#phase-v-submission)
+[![Cloud Platform](https://img.shields.io/badge/Google%20Cloud-GKE-4285F4?style=for-the-badge&logo=google-cloud)](http://34.93.106.63)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.31-326CE5?style=for-the-badge&logo=kubernetes)](https://kubernetes.io/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1-000000?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+
+A comprehensive demonstration of **Spec-Driven Development** methodology, evolving from a console app to a cloud-native, event-driven application with AI capabilities—showcasing modern software engineering practices, cloud deployment, and production-ready architecture.
 
 ## 📚 Project Overview
 
@@ -12,7 +21,42 @@ This repository showcases the evolution of a todo application from a simple cons
 - **Phase II**: Full-stack web application (Next.js + FastAPI + PostgreSQL) ✅ **COMPLETED**
 - **Phase III**: AI Chatbot with MCP tools (Natural language task management) ✅ **COMPLETED**
 - **Phase IV**: Kubernetes deployment (Minikube + Helm Charts) ✅ **COMPLETED**
-- **Phase V**: Cloud deployment with event-driven architecture 🎯 **[CURRENT - IN PROGRESS]**
+- **Phase V**: Cloud deployment with event-driven architecture ✅ **COMPLETED & LIVE**
+
+## 🎯 Quick Links
+
+| Resource | Link | Status |
+|----------|------|--------|
+| **Live Production App** | [http://34.93.106.63](http://34.93.106.63) | 🟢 Online |
+| **GitHub Repository** | [Ahmed-KHI/panaversity-spec-driven-todo](https://github.com/Ahmed-KHI/panaversity-spec-driven-todo) | 📦 Public |
+| **Phase II (Vercel)** | [panaversity-spec-driven-todo.vercel.app](https://panaversity-spec-driven-todo.vercel.app) | 🟢 Online |
+| **Phase III Chat** | [panaversity-spec-driven-todo.vercel.app/chat](https://panaversity-spec-driven-todo.vercel.app/chat) | 🟢 Online |
+| **Backend API (HF)** | [ahmedkhi-todo-api-phase2.hf.space](https://ahmedkhi-todo-api-phase2.hf.space) | 🟢 Online |
+| **API Documentation** | [ahmedkhi-todo-api-phase2.hf.space/docs](https://ahmedkhi-todo-api-phase2.hf.space/docs) | 📖 Swagger |
+
+## 🛠️ Technology Stack
+
+### **Frontend**
+- Next.js 16.1.1 (App Router, React 19.2.3, TypeScript 5.7.2)
+- Tailwind CSS 3.4.17, Better Auth 1.4.10
+- OpenAI ChatKit React, Self-hosted fonts
+
+### **Backend**
+- FastAPI (Python 3.13), SQLModel ORM
+- JWT Authentication, Bcrypt password hashing
+- OpenAI GPT-4o integration, MCP tools
+
+### **Database**
+- PostgreSQL 16 (Neon Serverless)
+- Advanced schema (recurring tasks, priorities, tags)
+
+### **Infrastructure & DevOps**
+- **Container Orchestration**: Kubernetes 1.31 (Minikube + GKE)
+- **Cloud Platform**: Google Cloud (asia-south1)
+- **Containerization**: Docker multi-stage builds
+- **Package Management**: Helm Charts
+- **Event Streaming**: Apache Kafka
+- **Service Mesh**: Dapr (Pub/Sub, State Store, Jobs, Secrets)
 
 ### **🏆 Latest Achievement: Phase V - Advanced Cloud Features!**
 
@@ -673,6 +717,19 @@ npm run dev
 
 ## 📈 Project Metrics
 
+### **Phase V Statistics (Cloud Deployment & Event-Driven Architecture)**
+- **Cloud Platform**: Google Cloud GKE (asia-south1)
+- **Production URL**: http://34.93.106.63 (✅ Live)
+- **Docker Images**: 2 optimized images (frontend 333MB, backend 211MB)
+- **Build Time**: 76s (97% improvement from 2967s failures)
+- **Event Architecture**: Kafka + Dapr integration configured
+- **Advanced Features**: 6 new capabilities (recurring tasks, priorities, tags, due dates, reminders, search)
+- **AI Model**: OpenAI GPT-4o (upgraded from GPT-4 Turbo)
+- **Database**: Neon PostgreSQL with advanced schema
+- **Deployment Platforms**: 2 (Minikube local + GKE production)
+- **Critical Fixes**: Google Fonts build failure resolved (self-hosted fonts)
+- **Development Time**: 3+ days (including Google Fonts debugging)
+
 ### **Phase IV Statistics (Kubernetes Deployment)**
 - **Docker Images**: 2 (frontend 333MB, backend 211MB)
 - **Kubernetes Manifests**: 9 YAML files
@@ -703,17 +760,28 @@ npm run dev
 - **Technology Stack**: 19/20 points
 - **Technical Implementation**: 89/90 points
 
-### **Combined Project Totals (All 4 Phases)**
-- **Total Files**: 100+ files
-- **Total Lines of Code**: ~5,000+ lines
-- **Total Development Time**: 20+ hours across 4 phases
-- **Deployment Platforms**: 4 (Vercel, Hugging Face Spaces, Neon PostgreSQL, Minikube)
-- **Technologies Integrated**: 20+ (Next.js, React, FastAPI, PostgreSQL, OpenAI, MCP, JWT, Bcrypt, Kubernetes, Docker, Helm, etc.)
-- **Total Score**: 250/250 Phase IV + previous phases
+### **Combined Project Totals (All 5 Phases)**
+- **Total Files**: 150+ files (including Phase V)
+- **Total Lines of Code**: ~7,000+ lines
+- **Total Development Time**: 25+ hours across 5 phases
+- **Deployment Platforms**: 5 (Vercel, Hugging Face Spaces, Neon PostgreSQL, Minikube, Google Cloud GKE)
+- **Technologies Integrated**: 25+ (Next.js, React, FastAPI, PostgreSQL, OpenAI GPT-4o, MCP, JWT, Bcrypt, Kubernetes, Docker, Helm, Kafka, Dapr, Google Cloud, etc.)
+- **Production Deployments**: 3 live URLs (Phase II Vercel, Phase III HF Spaces, Phase V GKE)
+- **Total Score**: 250/250 Phase IV + 150/150 Phase V potential
 
 ---
 
 ## 📚 Learning Resources
+
+### **Phase V Documentation**
+- **Phase 5 Cloud Deployment Guide**: [phase-2-fullstack/phase-5-docs/CLOUD-DEPLOYMENT.md](phase-2-fullstack/phase-5-docs/CLOUD-DEPLOYMENT.md)
+- **Phase 5 Quick Start**: [phase-2-fullstack/phase-5-docs/QUICK-START.md](phase-2-fullstack/phase-5-docs/QUICK-START.md)
+- **Phase 5 Implementation Fixes**: [phase-2-fullstack/phase-5-docs/IMPLEMENTATION-FIXES.md](phase-2-fullstack/phase-5-docs/IMPLEMENTATION-FIXES.md)
+- **Phase 5 Troubleshooting**: [phase-2-fullstack/phase-5-docs/TROUBLESHOOTING.md](phase-2-fullstack/phase-5-docs/TROUBLESHOOTING.md)
+- **Minikube Deployment Success**: [phase-5-minikube/DEPLOYMENT-SUCCESS.md](phase-5-minikube/DEPLOYMENT-SUCCESS.md)
+- **Minikube Quick Start**: [phase-5-minikube/QUICKSTART.md](phase-5-minikube/QUICKSTART.md)
+- **GKE Deployment Security**: [phase-5-gke/DEPLOYMENT-SECURITY.md](phase-5-gke/DEPLOYMENT-SECURITY.md)
+- **Dapr Integration Guide**: [phase-2-fullstack/phase-5-dapr/README.md](phase-2-fullstack/phase-5-dapr/README.md)
 
 ### **Phase IV Documentation**
 - **Phase 4 Submission Package**: [PHASE4-SUBMISSION.md](PHASE4-SUBMISSION.md)
@@ -756,22 +824,25 @@ Spec-Driven Development Advocate
 
 ## 🎓 Hackathon Submission
 
-### **Phase V Submission** 🎯 **[READY]**
+### **Phase V Submission** ✅ **COMPLETED - PRODUCTION LIVE**
 - **Event**: GIAIC Hackathon II - The Evolution of Todo
 - **Phase**: Phase V - Advanced Cloud Deployment
-- **Submission Date**: January 24, 2026
-- **Demo Video**: [Add after recording] ⏳
+- **Submission Date**: January 25, 2026
+- **Production URL**: http://34.93.106.63 (✅ Live on GKE)
+- **Demo Video**: [To be recorded] ⏳
 - **Repository**: https://github.com/Ahmed-KHI/panaversity-spec-driven-todo
-- **Deployment**: Minikube (working) + GKE (provisioned)
 - **Submission Form**: https://forms.gle/KMKEKaFUD6ZX4UtY8
 
-**Deployment Details:**
-- **Minikube**: All features working perfectly
-- **Frontend**: localhost:3000 (AI Chat functional)
-- **Backend**: localhost:8000 (OpenAI GPT-4o)
-- **Google Cloud GKE**: Cluster provisioned in asia-south1
-- **Advanced Features**: Recurring tasks, priorities, tags, due dates, reminders
-- **Event-Driven**: Kafka + Dapr configured
+**Production Deployment Details:**
+- **Google Cloud GKE**: asia-south1 (Mumbai) - http://34.93.106.63
+- **Frontend**: 2 pods @ 34.93.106.63 (✅ Live)
+- **Backend API**: 2 pods @ 34.93.106.63:8000 (✅ Live)
+- **AI Chat**: GPT-4o @ 34.93.106.63/chat (🤖 Active)
+- **Database**: Neon PostgreSQL (Serverless)
+- **Advanced Features**: ✅ All working (recurring tasks, priorities, tags, due dates, reminders, search)
+- **Event Architecture**: ✅ Kafka + Dapr configured
+- **Build Performance**: 76s (97% improvement from Google Fonts issue)
+- **Local Development**: ✅ Minikube deployment also available
 
 ### **Phase IV Submission** ✅ **COMPLETED**
 - **Event**: GIAIC Hackathon II - The Evolution of Todo
@@ -807,6 +878,18 @@ Spec-Driven Development Advocate
 - **Tag**: `phase-2-submission`
 
 ### **Key Features Demonstrated**
+
+**Phase V (Cloud Deployment & Event-Driven Architecture):**
+- ✅ **Production GKE Deployment** - Live at http://34.93.106.63
+- ✅ **Advanced Task Features** - Recurring tasks, priorities, tags, due dates, reminders
+- ✅ **AI Chatbot Enhanced** - OpenAI GPT-4o with improved error handling
+- ✅ **Event-Driven Architecture** - Kafka topics configured for task events
+- ✅ **Dapr Integration** - Pub/Sub, State Store, Jobs API, Secrets management
+- ✅ **Self-Hosted Fonts** - Deterministic builds (76s vs 2967s failures)
+- ✅ **Advanced Search** - Filter by priority, tags, status, dates
+- ✅ **Cloud-Native Architecture** - Scalable, resilient, production-ready
+- ✅ **Dual Deployment** - Minikube local + GKE production
+- ✅ **Complete CI/CD** - Automated builds and deployments
 
 **Phase IV (Kubernetes):**
 - ✅ Full Kubernetes deployment on Minikube
