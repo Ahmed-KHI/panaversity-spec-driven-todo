@@ -2,12 +2,19 @@
 
 > **🏆 Enterprise-Grade Todo Application | GIAIC Hackathon II: "The Evolution of Todo"**
 
-[![Production Status](https://img.shields.io/badge/Production-Live-success?style=for-the-badge)](http://34.93.106.63)
-[![Phase V](https://img.shields.io/badge/Phase%20V-Completed-blue?style=for-the-badge)](#phase-v-submission)
-[![Cloud Platform](https://img.shields.io/badge/Google%20Cloud-GKE-4285F4?style=for-the-badge&logo=google-cloud)](http://34.93.106.63)
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.31-326CE5?style=for-the-badge&logo=kubernetes)](https://kubernetes.io/)
-[![Next.js](https://img.shields.io/badge/Next.js-16.1-000000?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+<div align="center">
+
+[![Production](https://img.shields.io/badge/🚀_Production-LIVE-00C851?style=flat-square&labelColor=1a1a1a&color=00C851)](http://34.93.106.63)
+[![Phase V](https://img.shields.io/badge/Phase_V-✓_Completed-6C63FF?style=flat-square&labelColor=1a1a1a&color=6C63FF)](#phase-v-submission)
+[![Google Cloud](https://img.shields.io/badge/Google_Cloud-GKE-4285F4?style=flat-square&logo=google-cloud&logoColor=white&labelColor=1a1a1a)](http://34.93.106.63)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-v1.31-326CE5?style=flat-square&logo=kubernetes&logoColor=white&labelColor=1a1a1a)](https://kubernetes.io/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1-000000?style=flat-square&logo=next.js&logoColor=white&labelColor=1a1a1a)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Python_3.13-009688?style=flat-square&logo=fastapi&logoColor=white&labelColor=1a1a1a)](https://fastapi.tiangolo.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white&labelColor=1a1a1a)](https://www.postgresql.org/)
+[![Docker](https://img.shields.io/badge/Docker-Optimized-2496ED?style=flat-square&logo=docker&logoColor=white&labelColor=1a1a1a)](https://www.docker.com/)
+[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=flat-square&logo=openai&logoColor=white&labelColor=1a1a1a)](https://openai.com/)
+
+</div>
 
 A comprehensive demonstration of **Spec-Driven Development** methodology, evolving from a console app to a cloud-native, event-driven application with AI capabilities—showcasing modern software engineering practices, cloud deployment, and production-ready architecture.
 
