@@ -109,7 +109,7 @@ This repository showcases the evolution of a todo application from a simple cons
 | **Phase V** | Backend API (GKE) | http://34.93.106.63:8000 | ✅ Live |
 | **Phase V** | AI Chat (GKE) | http://34.93.106.63/chat | 🤖 Active |
 | **Phase V** | Minikube Cluster | localhost (Minikube) | ✅ Running |
-| **Phase V** | Demo Video | [Add after recording] | ⏳ Recording |
+| **Phase V** | Demo Video | [youtu.be/NoGn8_LOVTQ](https://youtu.be/NoGn8_LOVTQ) | 🎬 90 seconds |
 
 ---
 
@@ -836,7 +836,7 @@ Spec-Driven Development Advocate
 - **Phase**: Phase V - Advanced Cloud Deployment
 - **Submission Date**: January 25, 2026
 - **Production URL**: http://34.93.106.63 (✅ Live on GKE)
-- **Demo Video**: [To be recorded] ⏳
+- **Demo Video**: [youtu.be/NoGn8_LOVTQ](https://youtu.be/NoGn8_LOVTQ) (🎬 90 seconds)
 - **Repository**: https://github.com/Ahmed-KHI/panaversity-spec-driven-todo
 - **Submission Form**: https://forms.gle/KMKEKaFUD6ZX4UtY8
 
