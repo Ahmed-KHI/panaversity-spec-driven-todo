@@ -147,11 +147,11 @@ def list_tasks(
     if is_recurring is not None:
         query = query.where(Task.is_recurring == is_recurring)
     
-    # Apply tag filter (AND logic)
+    # Apply tag filter (AND logic - case insensitive)
     if tags:
         for tag_name in tags:
             tag = session.exec(
-                select(Tag).where(Tag.name == tag_name)
+                select(Tag).where(Tag.name.ilike(tag_name))
             ).first()
             if tag:
                 # Subquery to check task has this tag
@@ -160,6 +160,10 @@ def list_tasks(
                         select(TaskTag.task_id).where(TaskTag.tag_id == tag.id)
                     )
                 )
+            else:
+                # If tag doesn't exist, no tasks will match
+                # Return empty result by filtering to non-existent task
+                query = query.where(Task.id == -1)
     
     # Apply sorting
     sort_field = Task.created_at  # Default

@@ -18,65 +18,31 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [activeFilters, setActiveFilters] = useState<SearchFilters>({})
+  const [isAdvancedSearch, setIsAdvancedSearch] = useState(false)
 
   // Apply local filtering
   useEffect(() => {
     let filtered = [...tasks]
 
-    // Apply status filter
-    if (filter === 'pending') {
-      filtered = filtered.filter(t => !t.completed)
-    } else if (filter === 'completed') {
-      filtered = filtered.filter(t => t.completed)
-    }
-
-    // Apply active search filters
-    if (activeFilters.search) {
-      const searchLower = activeFilters.search.toLowerCase()
-      filtered = filtered.filter(t => 
-        t.title.toLowerCase().includes(searchLower) ||
-        (t.description?.toLowerCase().includes(searchLower))
-      )
-    }
-
-    if (activeFilters.priority?.length) {
-      filtered = filtered.filter(t => 
-        activeFilters.priority?.includes((t as any).priority)
-      )
-    }
-
-    if (activeFilters.isRecurring !== undefined) {
-      filtered = filtered.filter(t => 
-        (t as any).is_recurring === activeFilters.isRecurring
-      )
-    }
-
-    if (activeFilters.dueAfter) {
-      const after = new Date(activeFilters.dueAfter)
-      filtered = filtered.filter(t => 
-        (t as any).due_date && new Date((t as any).due_date) >= after
-      )
-    }
-
-    if (activeFilters.dueBefore) {
-      const before = new Date(activeFilters.dueBefore)
-      filtered = filtered.filter(t => 
-        (t as any).due_date && new Date((t as any).due_date) <= before
-      )
-    }
-
-    if (activeFilters.tags?.length) {
-      filtered = filtered.filter(t => {
-        const taskTags = ((t as any).tags || []).map((tag: any) => tag.name)
-        return activeFilters.tags?.every(tag => taskTags.includes(tag))
-      })
+    // Only apply local filters if NOT in advanced search mode
+    // (advanced search filters are already applied by backend)
+    if (!isAdvancedSearch) {
+      // Apply status filter
+      if (filter === 'pending') {
+        filtered = filtered.filter(t => !t.completed)
+      } else if (filter === 'completed') {
+        filtered = filtered.filter(t => t.completed)
+      }
     }
 
     setDisplayedTasks(filtered)
-  }, [tasks, filter, activeFilters])
+  }, [tasks, filter, isAdvancedSearch])
 
   const handleAdvancedSearch = async (filters: SearchFilters) => {
     setLoading(true)
+    setIsAdvancedSearch(true)
+    
+    // Store filters for display purposes
     setActiveFilters(filters)
     
     // Build query params for backend
@@ -107,7 +73,10 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
 
       if (response.ok) {
         const data = await response.json()
+        // Backend returns already filtered tasks, so we just set them
         setTasks(data.tasks)
+      } else {
+        console.error('Advanced search failed with status:', response.status)
       }
     } catch (error) {
       console.error('Advanced search failed:', error)
@@ -118,6 +87,7 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
 
   const handleResetSearch = () => {
     setActiveFilters({})
+    setIsAdvancedSearch(false)
     setTasks(initialTasks)
   }
 
