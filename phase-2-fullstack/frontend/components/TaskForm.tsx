@@ -34,6 +34,11 @@ export default function TaskForm({ userId, onTaskCreated }: TaskFormProps) {
         is_recurring: isRecurring
       }
 
+      // Add tags if provided (comma-separated)
+      if (tags.trim()) {
+        taskData.tags = tags.split(',').map(t => t.trim()).filter(t => t.length > 0)
+      }
+
       if (isRecurring) {
         taskData.recurrence_pattern = {
           frequency: recurrenceFrequency,
@@ -135,6 +140,24 @@ export default function TaskForm({ userId, onTaskCreated }: TaskFormProps) {
           onChange={(e) => setDueDate(e.target.value)}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-gray-900"
         />
+      </div>
+
+      {/* Tags Field */}
+      <div>
+        <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+          Tags
+        </label>
+        <input
+          type="text"
+          id="tags"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 text-gray-900"
+          placeholder="work, urgent, personal (comma-separated)"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          💡 Separate multiple tags with commas
+        </p>
       </div>
 
       <div className="flex items-center">
