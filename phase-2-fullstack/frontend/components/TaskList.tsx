@@ -113,50 +113,50 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
       <AdvancedSearch onSearch={handleAdvancedSearch} onReset={handleResetSearch} />
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-          <p className="text-3xl font-bold text-gray-900">{tasks.length}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="glass p-5 sm:p-6 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform cursor-pointer group">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide">Total Tasks</p>
+          <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform mt-1">{tasks.length}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-sm font-medium text-gray-600">Pending</p>
-          <p className="text-3xl font-bold text-yellow-600">{pendingCount}</p>
+        <div className="glass p-5 sm:p-6 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform cursor-pointer group">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide">Pending</p>
+          <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-yellow-500 to-orange-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform mt-1">{pendingCount}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-sm font-medium text-gray-600">Completed</p>
-          <p className="text-3xl font-bold text-green-600">{completedCount}</p>
+        <div className="glass p-5 sm:p-6 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform cursor-pointer group sm:col-span-2 lg:col-span-1">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 uppercase tracking-wide">Completed</p>
+          <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-500 to-emerald-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform mt-1">{completedCount}</p>
         </div>
       </div>
 
       {/* Filter and Add Button */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-lg shadow">
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-4 glass p-4 sm:p-5 rounded-xl sm:rounded-2xl">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+            className={`flex-1 min-w-[80px] px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all hover:scale-105 ${
               filter === 'all'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                : 'bg-white/60 text-gray-700 hover:bg-white/80 border border-white/40'
             }`}
           >
             All
           </button>
           <button
             onClick={() => setFilter('pending')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+            className={`flex-1 min-w-[80px] px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all hover:scale-105 ${
               filter === 'pending'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-yellow-500 to-orange-600 text-white shadow-lg'
+                : 'bg-white/60 text-gray-700 hover:bg-white/80 border border-white/40'
             }`}
           >
             Pending
           </button>
           <button
             onClick={() => setFilter('completed')}
-            className={`px-4 py-2 rounded-md text-sm font-medium ${
+            className={`flex-1 min-w-[80px] px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-medium transition-all hover:scale-105 ${
               filter === 'completed'
-                ? 'bg-blue-600 text-white shadow-md'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg'
+                : 'bg-white/60 text-gray-700 hover:bg-white/80 border border-white/40'
             }`}
           >
             Completed
@@ -165,35 +165,39 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
 
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium shadow-md"
+          className="w-full px-5 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-indigo-700 hover:to-purple-700 text-sm sm:text-base font-medium shadow-lg hover:shadow-xl hover:scale-105 transition-all"
         >
-          {showForm ? 'Cancel' : '+ New Task'}
+          {showForm ? '✕ Cancel' : '✨ New Task'}
         </button>
       </div>
 
       {/* Task Form */}
       {showForm && (
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Task</h3>
+        <div className="glass p-6 rounded-2xl">
+          <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">✨ Create New Task</h3>
           <TaskForm userId={userId} onTaskCreated={handleTaskCreated} />
         </div>
       )}
 
       {/* Loading State */}
       {loading && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-          <p className="text-blue-700">🔍 Searching tasks...</p>
+        <div className="glass border border-indigo-200 rounded-2xl p-5 text-center">
+          <div className="flex items-center justify-center gap-3">
+            <div className="animate-spin h-5 w-5 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
+            <p className="text-indigo-700 font-medium">🔍 Searching tasks...</p>
+          </div>
         </div>
       )}
 
       {/* Task List */}
       <div className="space-y-3">
         {displayedTasks.length === 0 ? (
-          <div className="bg-white p-8 rounded-lg shadow text-center">
-            <p className="text-gray-500">
+          <div className="glass p-10 rounded-2xl text-center">
+            <div className="text-6xl mb-4">📋</div>
+            <p className="text-gray-600 font-medium text-lg">
               {filter === 'all' && 'No tasks found. Try adjusting your filters or create a new task!'}
-              {filter === 'pending' && 'No pending tasks found. Great job!'}
-              {filter === 'completed' && 'No completed tasks found yet.'}
+              {filter === 'pending' && 'No pending tasks found. Great job! 🎉'}
+              {filter === 'completed' && 'No completed tasks found yet. Keep going! 🚀'}
             </p>
           </div>
         ) : (
@@ -211,9 +215,9 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
 
       {/* Results Summary */}
       {Object.keys(activeFilters).length > 0 && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p className="text-sm text-gray-600">
-            Showing <span className="font-semibold">{displayedTasks.length}</span> of <span className="font-semibold">{tasks.length}</span> total tasks
+        <div className="glass border border-indigo-200 rounded-2xl p-4">
+          <p className="text-sm font-medium bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Showing <span className="font-bold text-lg">{displayedTasks.length}</span> of <span className="font-bold text-lg">{tasks.length}</span> total tasks
           </p>
         </div>
       )}

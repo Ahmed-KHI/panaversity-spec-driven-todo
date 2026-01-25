@@ -20,6 +20,9 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
   const [recurrenceFrequency, setRecurrenceFrequency] = useState(
     (task as any).recurrence_pattern?.frequency || 'daily'
   )
+  const [tags, setTags] = useState(
+    (task as any).tags ? (task as any).tags.map((t: any) => t.name).join(', ') : ''
+  )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -49,7 +52,7 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
     setError(null)
     
     try {
-      const payload = { 
+      const payload: any = { 
         userId, 
         title, 
         description,
@@ -60,6 +63,11 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
           frequency: recurrenceFrequency,
           interval: 1
         } : undefined
+      }
+
+      // Add tags if provided (comma-separated)
+      if (tags.trim()) {
+        payload.tags = tags.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0)
       }
 
       console.log('Updating task:', payload)
@@ -113,12 +121,12 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
 
   if (isEditing) {
     return (
-      <div className="bg-white p-4 rounded-lg shadow">
-        <form onSubmit={handleUpdate} className="space-y-3">
+      <div className="glass p-6 rounded-2xl hover:shadow-xl transition-all">
+        <form onSubmit={handleUpdate} className="space-y-4">
           {/* Error Display */}
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-              <span className="text-red-600 font-bold">⚠️</span>
+            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl flex items-start gap-2 shadow-sm">
+              <span className="text-red-600 font-bold text-lg">⚠️</span>
               <div className="flex-1">
                 <p className="text-sm font-medium text-red-800">Update Failed</p>
                 <p className="text-sm text-red-700">{error}</p>
@@ -175,6 +183,21 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
             />
           </div>
 
+          {/* Tags Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <input
+              type="text"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900"
+              placeholder="work, urgent, personal (comma-separated)"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Separate multiple tags with commas
+            </p>
+          </div>
+
           {/* Recurring Checkbox */}
           <div className="flex items-center gap-2">
             <input
@@ -206,20 +229,20 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
             </div>
           )}
 
-          <div className="flex gap-2">
+          <div className="flex gap-3 pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 shadow-md"
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 shadow-lg hover:shadow-xl hover:scale-105 transition-all font-medium"
             >
-              Save
+              {loading ? '🔄 Saving...' : '✔️ Save'}
             </button>
             <button
               type="button"
               onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              className="px-6 py-3 bg-white/60 text-gray-700 rounded-xl hover:bg-white/80 border border-white/40 hover:scale-105 transition-all font-medium"
             >
-              Cancel
+              ✕ Cancel
             </button>
           </div>
         </form>
@@ -228,33 +251,33 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
   }
 
   return (
-    <div className={`bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow ${
+    <div className={`glass p-4 sm:p-5 rounded-xl sm:rounded-2xl hover:shadow-xl transition-all hover:scale-[1.02] ${
       task.completed ? 'opacity-75' : ''
     }`}>
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         <input
           type="checkbox"
           checked={task.completed}
           onChange={handleToggle}
           disabled={loading}
-          className="mt-1 h-5 w-5 text-primary-600 rounded focus:ring-primary-500"
+          className="mt-1 h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 rounded-lg focus:ring-2 focus:ring-indigo-500 cursor-pointer hover:scale-110 transition-transform flex-shrink-0"
         />
         
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h3 className={`text-lg font-medium ${
-              task.completed ? 'line-through text-gray-500' : 'text-gray-900'
+          <div className="flex items-start sm:items-center gap-2 flex-wrap mb-2">
+            <h3 className={`text-base sm:text-lg font-bold break-words ${
+              task.completed ? 'line-through text-gray-500' : 'bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent'
             }`}>
               {task.title}
             </h3>
             
             {/* Priority Badge */}
             {(task as any).priority && (
-              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                (task as any).priority === 'urgent' ? 'bg-red-100 text-red-800' :
-                (task as any).priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                (task as any).priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-green-100 text-green-800'
+              <span className={`px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold rounded-lg sm:rounded-xl shadow-md whitespace-nowrap ${
+                (task as any).priority === 'urgent' ? 'bg-gradient-to-r from-red-500 to-pink-600 text-white' :
+                (task as any).priority === 'high' ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white' :
+                (task as any).priority === 'medium' ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white' :
+                'bg-gradient-to-r from-green-400 to-emerald-500 text-white'
               }`}>
                 {((task as any).priority as string).toUpperCase()}
               </span>
@@ -262,42 +285,53 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
 
             {/* Recurring Badge */}
             {(task as any).is_recurring && (
-              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+              <span className="px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold rounded-lg sm:rounded-xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-md whitespace-nowrap">
                 🔄 RECURRING
               </span>
+            )}
+
+            {/* Tags Display */}
+            {(task as any).tags && (task as any).tags.length > 0 && (
+              <div className="flex gap-1 flex-wrap w-full sm:w-auto">
+                {(task as any).tags.map((tag: any, index: number) => (
+                  <span key={index} className="px-2 py-1 text-[10px] sm:text-xs font-semibold rounded-md sm:rounded-lg bg-gradient-to-r from-cyan-400 to-blue-500 text-white shadow-sm">
+                    #{tag.name}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
 
           {task.description && (
-            <p className="mt-1 text-sm text-gray-600">{task.description}</p>
+            <p className="mt-2 text-xs sm:text-sm text-gray-700 leading-relaxed break-words">{task.description}</p>
           )}
 
           {/* Due Date */}
           {(task as any).due_date && (
-            <p className="mt-2 text-xs text-gray-500">
+            <p className="mt-2 sm:mt-3 text-[10px] sm:text-xs font-medium text-indigo-600 flex items-center gap-1">
               📅 Due: {new Date((task as any).due_date).toLocaleString()}
             </p>
           )}
 
-          <p className="mt-2 text-xs text-gray-400">
-            Created: {new Date(task.created_at).toLocaleDateString()}
+          <p className="mt-2 text-[10px] sm:text-xs text-gray-500 flex items-center gap-1">
+            🕒 Created: {new Date(task.created_at).toLocaleDateString()}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
           <button
             onClick={() => setIsEditing(true)}
             disabled={loading}
-            className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 shadow-md hover:shadow-lg hover:scale-105 transition-all whitespace-nowrap"
           >
-            Edit
+            ✏️ <span className="hidden sm:inline">Edit</span>
           </button>
           <button
             onClick={handleDelete}
             disabled={loading}
-            className="px-3 py-1 text-sm text-red-600 hover:text-red-800 disabled:opacity-50"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-lg sm:rounded-xl hover:from-red-600 hover:to-pink-700 disabled:opacity-50 shadow-md hover:shadow-lg hover:scale-105 transition-all whitespace-nowrap"
           >
-            Delete
+            🗑️ <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
       </div>

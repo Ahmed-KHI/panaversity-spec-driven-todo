@@ -47,23 +47,25 @@ export default async function DashboardPage() {
     }
 
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         <Header user={user} />
         
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">My Tasks</h1>
-              <p className="mt-2 text-gray-600">
-                Manage your tasks efficiently
+        <main className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+          <div className="mb-6 sm:mb-8 glass p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6 shadow-xl hover:shadow-2xl transition-all">
+            <div className="w-full sm:w-auto">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                ✨ My Tasks
+              </h1>
+              <p className="mt-2 sm:mt-3 text-gray-600 font-medium text-sm sm:text-base md:text-lg">
+                Manage your tasks efficiently with premium features
               </p>
             </div>
             
             <Link
               href="/chat"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl hover:scale-105 font-bold text-sm sm:text-base whitespace-nowrap"
             >
-              💬 Chat with AI Assistant
+              💬 Chat with AI
             </Link>
           </div>
 
