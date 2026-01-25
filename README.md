@@ -147,6 +147,65 @@ kubectl apply -f phase-5-minikube/
 kubectl port-forward -n todo-app svc/todo-frontend 3000:3000
 kubectl port-forward -n todo-app svc/todo-backend 8000:8000
 ```
+
+---
+
+## 🐛 Bug Fixes (v5.0.9)
+
+**Release Date:** December 25, 2025  
+**Status:** ✅ Deployed to Production
+
+### Critical Issues Resolved
+
+1. **✅ Manual Task Edit/Update Fixed**
+   - **Problem:** Users couldn't manually edit tasks via Edit button (updates failed silently)
+   - **Root Cause:** Missing `credentials: 'include'` in fetch request, no error handling
+   - **Solution:** 
+     - Added proper authentication credentials
+     - Implemented comprehensive error handling
+     - Added user-friendly error messages with red alert UI
+     - Enhanced console logging for debugging
+   - **Files Modified:** [`TaskItem.tsx`](phase-2-fullstack/frontend/components/TaskItem.tsx)
+
+2. **✅ Advanced Search UI Added**
+   - **Problem:** No search/filter UI visible in dashboard (backend was ready, frontend missing)
+   - **Root Cause:** AdvancedSearch component never created
+   - **Solution:**
+     - Created complete AdvancedSearch component (235 lines)
+     - Integrated into TaskList with state management
+     - Added API route for backend communication
+     - Implemented all filter types: search, priority, tags, status, dates, recurring
+   - **Files Created:** [`AdvancedSearch.tsx`](phase-2-fullstack/frontend/components/AdvancedSearch.tsx), [`route.ts`](phase-2-fullstack/frontend/app/api/tasks/search/route.ts)
+   - **Files Modified:** [`TaskList.tsx`](phase-2-fullstack/frontend/components/TaskList.tsx)
+
+### New Capabilities
+
+**Advanced Search Features:**
+- 🔍 **Text Search** - Search by task title or description
+- 🎯 **Priority Filter** - Multi-select: low, medium, high, urgent
+- 📋 **Status Filter** - Filter by all, pending, or completed
+- 📅 **Date Range** - Filter by due after/before dates
+- 🔁 **Recurring Filter** - Show recurring only, one-time only, or all
+- 🏷️ **Tags Filter** - Filter by multiple tags (comma-separated)
+- 📊 **Active Filters Display** - Visual summary with colored badges
+- 🔄 **Clear All** - Reset all filters at once
+- 📈 **Results Count** - Shows "X of Y tasks" summary
+
+**Error Handling Improvements:**
+- ⚠️ Error alerts display in red box with dismiss button
+- 🔍 Specific error messages from backend
+- 📝 Console logging for debugging (non-intrusive)
+- ⏳ Loading states during operations
+
+### Testing
+
+See [TESTING-GUIDE-v5.0.9.md](phase-2-fullstack/TESTING-GUIDE-v5.0.9.md) for comprehensive testing procedures.
+
+**Quick Test:**
+1. Go to http://34.93.106.63
+2. Click Edit on any task → Change title → Save (should work now!)
+3. Expand "🔍 Advanced Search" → Apply filters (now visible!)
+
 ---
 
 ## 🎯 Phase IV Highlights

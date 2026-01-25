@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Task } from '@/lib/api'
 import TaskItem from './TaskItem'
 import TaskForm from './TaskForm'
+import AdvancedSearch, { SearchFilters } from './AdvancedSearch'
 
 interface TaskListProps {
   initialTasks: Task[]
@@ -12,14 +13,113 @@ interface TaskListProps {
 
 export default function TaskList({ initialTasks, userId }: TaskListProps) {
   const [tasks, setTasks] = useState<Task[]>(initialTasks)
+  const [displayedTasks, setDisplayedTasks] = useState<Task[]>(initialTasks)
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all')
   const [showForm, setShowForm] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [activeFilters, setActiveFilters] = useState<SearchFilters>({})
 
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === 'pending') return !task.completed
-    if (filter === 'completed') return task.completed
-    return true
-  })
+  // Apply local filtering
+  useEffect(() => {
+    let filtered = [...tasks]
+
+    // Apply status filter
+    if (filter === 'pending') {
+      filtered = filtered.filter(t => !t.completed)
+    } else if (filter === 'completed') {
+      filtered = filtered.filter(t => t.completed)
+    }
+
+    // Apply active search filters
+    if (activeFilters.search) {
+      const searchLower = activeFilters.search.toLowerCase()
+      filtered = filtered.filter(t => 
+        t.title.toLowerCase().includes(searchLower) ||
+        (t.description?.toLowerCase().includes(searchLower))
+      )
+    }
+
+    if (activeFilters.priority?.length) {
+      filtered = filtered.filter(t => 
+        activeFilters.priority?.includes((t as any).priority)
+      )
+    }
+
+    if (activeFilters.isRecurring !== undefined) {
+      filtered = filtered.filter(t => 
+        (t as any).is_recurring === activeFilters.isRecurring
+      )
+    }
+
+    if (activeFilters.dueAfter) {
+      const after = new Date(activeFilters.dueAfter)
+      filtered = filtered.filter(t => 
+        (t as any).due_date && new Date((t as any).due_date) >= after
+      )
+    }
+
+    if (activeFilters.dueBefore) {
+      const before = new Date(activeFilters.dueBefore)
+      filtered = filtered.filter(t => 
+        (t as any).due_date && new Date((t as any).due_date) <= before
+      )
+    }
+
+    if (activeFilters.tags?.length) {
+      filtered = filtered.filter(t => {
+        const taskTags = ((t as any).tags || []).map((tag: any) => tag.name)
+        return activeFilters.tags?.every(tag => taskTags.includes(tag))
+      })
+    }
+
+    setDisplayedTasks(filtered)
+  }, [tasks, filter, activeFilters])
+
+  const handleAdvancedSearch = async (filters: SearchFilters) => {
+    setLoading(true)
+    setActiveFilters(filters)
+    
+    // Build query params for backend
+    const params = new URLSearchParams()
+    
+    if (filters.search) params.append('search', filters.search)
+    if (filters.priority?.length) {
+      filters.priority.forEach(p => params.append('priority', p))
+    }
+    if (filters.tags?.length) {
+      filters.tags.forEach(t => params.append('tags', t))
+    }
+    if (filters.dueBefore) params.append('due_before', filters.dueBefore)
+    if (filters.dueAfter) params.append('due_after', filters.dueAfter)
+    if (filters.isRecurring !== undefined) {
+      params.append('is_recurring', String(filters.isRecurring))
+    }
+    if (filters.status && filters.status !== 'all') {
+      params.append('completed', filters.status)
+    }
+
+    try {
+      const response = await fetch(`/api/tasks/search?${params.toString()}`, {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setTasks(data.tasks)
+      }
+    } catch (error) {
+      console.error('Advanced search failed:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResetSearch = () => {
+    setActiveFilters({})
+    setTasks(initialTasks)
+  }
 
   const handleTaskCreated = (newTask: Task) => {
     setTasks([newTask, ...tasks])
@@ -39,6 +139,9 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
 
   return (
     <div className="space-y-6">
+      {/* Advanced Search Component */}
+      <AdvancedSearch onSearch={handleAdvancedSearch} onReset={handleResetSearch} />
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-6 rounded-lg shadow">
@@ -106,18 +209,25 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
         </div>
       )}
 
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+          <p className="text-blue-700">🔍 Searching tasks...</p>
+        </div>
+      )}
+
       {/* Task List */}
       <div className="space-y-3">
-        {filteredTasks.length === 0 ? (
+        {displayedTasks.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow text-center">
             <p className="text-gray-500">
-              {filter === 'all' && 'No tasks yet. Create one to get started!'}
-              {filter === 'pending' && 'No pending tasks. Great job!'}
-              {filter === 'completed' && 'No completed tasks yet.'}
+              {filter === 'all' && 'No tasks found. Try adjusting your filters or create a new task!'}
+              {filter === 'pending' && 'No pending tasks found. Great job!'}
+              {filter === 'completed' && 'No completed tasks found yet.'}
             </p>
           </div>
         ) : (
-          filteredTasks.map((task) => (
+          displayedTasks.map((task) => (
             <TaskItem
               key={task.id}
               task={task}
@@ -128,6 +238,15 @@ export default function TaskList({ initialTasks, userId }: TaskListProps) {
           ))
         )}
       </div>
+
+      {/* Results Summary */}
+      {Object.keys(activeFilters).length > 0 && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p className="text-sm text-gray-600">
+            Showing <span className="font-semibold">{displayedTasks.length}</span> of <span className="font-semibold">{tasks.length}</span> total tasks
+          </p>
+        </div>
+      )}
     </div>
   )
 }

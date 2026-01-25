@@ -21,6 +21,7 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
     (task as any).recurrence_pattern?.frequency || 'daily'
   )
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleToggle = async () => {
     setLoading(true)
@@ -45,32 +46,45 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
     
     try {
+      const payload = { 
+        userId, 
+        title, 
+        description,
+        priority,
+        due_date: dueDate || null,
+        is_recurring: isRecurring,
+        recurrence_pattern: isRecurring ? {
+          frequency: recurrenceFrequency,
+          interval: 1
+        } : undefined
+      }
+
+      console.log('Updating task:', payload)
+
       const response = await fetch(`/api/tasks/${task.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          userId, 
-          title, 
-          description,
-          priority,
-          due_date: dueDate || null,
-          is_recurring: isRecurring,
-          recurrence_pattern: isRecurring ? {
-            frequency: recurrenceFrequency,
-            interval: 1
-          } : undefined
-        }),
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important for auth cookies
+        body: JSON.stringify(payload),
       })
 
-      if (!response.ok) throw new Error('Failed to update task')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || `Failed to update task: ${response.status}`)
+      }
 
       const updatedTask = await response.json()
+      console.log('Task updated successfully:', updatedTask)
       onTaskUpdated(updatedTask)
       setIsEditing(false)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update task:', error)
+      setError(error.message || 'Failed to update task. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -101,6 +115,24 @@ export default function TaskItem({ task, userId, onTaskUpdated, onTaskDeleted }:
     return (
       <div className="bg-white p-4 rounded-lg shadow">
         <form onSubmit={handleUpdate} className="space-y-3">
+          {/* Error Display */}
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <span className="text-red-600 font-bold">⚠️</span>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">Update Failed</p>
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setError(null)}
+                className="text-red-400 hover:text-red-600"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+
           <input
             type="text"
             value={title}
